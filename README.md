@@ -13,6 +13,9 @@ The same Next.js landing page ("Visit Mars") built six times, once per styling a
 
 Each app is standalone, with its own lockfile and configs, and nothing is shared between them. `PLAN.md` has the full spec and `PRD.md` the original brief.
 
+> [!IMPORTANT]
+> Open each app as its own VS Code window, e.g. `code apps/tailwind`, not the repo root. VS Code only reads `.vscode/settings.json` and `.vscode/extensions.json` from the folder you open, so from the root none of the per-app settings or extension recommendations apply, and Biome and TypeScript won't pick up the app's config.
+
 ## Running
 
 Requirements: Node 22 or newer (the measurements used 24.15), bun 1.3, and [hyperfine](https://github.com/sharkdp/hyperfine) for the benchmarks.
