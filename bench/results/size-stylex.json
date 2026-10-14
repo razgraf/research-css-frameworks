@@ -1,0 +1,33 @@
+{
+  "app": "stylex",
+  "unit": "bytes",
+  "firstLoad": {
+    "html": {
+      "raw": 18645,
+      "gzip": 4626,
+      "brotli": 4038
+    },
+    "css": {
+      "raw": 9191,
+      "gzip": 2975,
+      "brotli": 2706
+    },
+    "js": {
+      "raw": 574425,
+      "gzip": 177168,
+      "brotli": 152926
+    }
+  },
+  "total": {
+    "css": {
+      "raw": 9191,
+      "gzip": 2975,
+      "brotli": 2706
+    },
+    "js": {
+      "raw": 576936,
+      "gzip": 178374,
+      "brotli": 154017
+    }
+  }
+}

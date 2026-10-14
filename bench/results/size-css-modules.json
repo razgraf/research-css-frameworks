@@ -1,0 +1,33 @@
+{
+  "app": "css-modules",
+  "unit": "bytes",
+  "firstLoad": {
+    "html": {
+      "raw": 16928,
+      "gzip": 4084,
+      "brotli": 3497
+    },
+    "css": {
+      "raw": 10680,
+      "gzip": 2932,
+      "brotli": 2556
+    },
+    "js": {
+      "raw": 572821,
+      "gzip": 176288,
+      "brotli": 152118
+    }
+  },
+  "total": {
+    "css": {
+      "raw": 10680,
+      "gzip": 2932,
+      "brotli": 2556
+    },
+    "js": {
+      "raw": 575332,
+      "gzip": 177494,
+      "brotli": 153209
+    }
+  }
+}

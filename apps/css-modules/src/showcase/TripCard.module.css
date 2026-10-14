@@ -1,0 +1,43 @@
+.root {
+  --featured: false;
+  position: relative;
+}
+
+.featured {
+  --featured: true;
+}
+
+.root:has(li:hover, button:focus-visible) > .card {
+  border-color: var(--color-accent);
+}
+
+@scope (.root) {
+  :scope li {
+    padding: var(--spacing-2);
+    border-radius: var(--radius-medium);
+    transition: background-color var(--duration-fast) var(--easing-standard);
+  }
+
+  :scope li:hover {
+    background: var(--color-surface-hover);
+  }
+}
+
+.badge {
+  display: none;
+  position: absolute;
+  top: calc(var(--spacing-3) * -1);
+  right: var(--spacing-6);
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+}
+
+@container style(--featured: true) {
+  .badge {
+    display: block;
+  }
+}

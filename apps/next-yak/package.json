@@ -1,0 +1,24 @@
+{
+  "name": "next-yak",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome check",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lucide-react": "1.57.0",
+    "next": "16.4.0",
+    "next-yak": "9.10.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "typescript": "6.0.3"
+  }
+}

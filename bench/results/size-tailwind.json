@@ -1,0 +1,33 @@
+{
+  "app": "tailwind",
+  "unit": "bytes",
+  "firstLoad": {
+    "html": {
+      "raw": 18880,
+      "gzip": 4456,
+      "brotli": 3823
+    },
+    "css": {
+      "raw": 15132,
+      "gzip": 4284,
+      "brotli": 3793
+    },
+    "js": {
+      "raw": 572802,
+      "gzip": 176308,
+      "brotli": 152121
+    }
+  },
+  "total": {
+    "css": {
+      "raw": 15132,
+      "gzip": 4284,
+      "brotli": 3793
+    },
+    "js": {
+      "raw": 575313,
+      "gzip": 177514,
+      "brotli": 153212
+    }
+  }
+}

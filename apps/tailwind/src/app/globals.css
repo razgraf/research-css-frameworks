@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+
+@theme {
+  --*: initial;
+
+  --color-neutral-950: #0b0d12;
+  --color-neutral-900: #12151c;
+  --color-neutral-800: #1c2029;
+  --color-neutral-700: #2a2f3a;
+  --color-neutral-600: #4a5060;
+  --color-neutral-400: #8a90a0;
+  --color-neutral-200: #d5d8e0;
+  --color-neutral-100: #eceef2;
+  --color-neutral-50: #f7f8fa;
+  --color-white: #ffffff;
+  --color-mars-300: #f4a37e;
+  --color-mars-400: #ee7d4f;
+  --color-mars-500: #e2612e;
+  --color-mars-600: #c24e1f;
+  --color-mars-700: #9a3c17;
+
+  --color-background: var(--color-neutral-950);
+  --color-surface: var(--color-neutral-900);
+  --color-surface-hover: var(--color-neutral-800);
+  --color-border: var(--color-neutral-700);
+  --color-text-primary: var(--color-neutral-50);
+  --color-text-secondary: var(--color-neutral-400);
+  --color-accent: var(--color-mars-400);
+  --color-accent-hover: var(--color-mars-300);
+  --color-text-on-accent: var(--color-neutral-950);
+  --color-focus-ring: var(--color-mars-300);
+  --shadow-card: 0 8px 24px rgb(0 0 0 / 0.4);
+
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-icon-small: 16px;
+  --spacing-icon-medium: 20px;
+
+  --radius-small: 6px;
+  --radius-medium: 12px;
+  --radius-large: 20px;
+  --radius-full: 9999px;
+
+  --text-small: 10.5pt;
+  --text-body: 12pt;
+  --text-large: 15pt;
+  --text-heading-small: 24pt;
+  --text-heading-medium: 33pt;
+  --text-heading-large: 42pt;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: var(--ease-standard);
+
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --container-card-wide: 400px;
+  --container-page: 1152px;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  [data-theme="light"] {
+    color-scheme: light;
+    --color-background: var(--color-neutral-50);
+    --color-surface: var(--color-white);
+    --color-surface-hover: var(--color-neutral-100);
+    --color-border: var(--color-neutral-200);
+    --color-text-primary: var(--color-neutral-950);
+    --color-text-secondary: var(--color-neutral-600);
+    --color-accent: var(--color-mars-700);
+    --color-accent-hover: var(--color-mars-600);
+    --color-text-on-accent: var(--color-white);
+    --color-focus-ring: var(--color-mars-600);
+    --shadow-card: 0 8px 24px rgb(16 18 24 / 0.08);
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@utility surface {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+}
+
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+}

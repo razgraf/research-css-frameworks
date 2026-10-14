@@ -1,0 +1,33 @@
+{
+  "app": "linaria",
+  "unit": "bytes",
+  "firstLoad": {
+    "html": {
+      "raw": 16309,
+      "gzip": 4065,
+      "brotli": 3490
+    },
+    "css": {
+      "raw": 8857,
+      "gzip": 2617,
+      "brotli": 2296
+    },
+    "js": {
+      "raw": 578274,
+      "gzip": 178891,
+      "brotli": 154387
+    }
+  },
+  "total": {
+    "css": {
+      "raw": 8857,
+      "gzip": 2617,
+      "brotli": 2296
+    },
+    "js": {
+      "raw": 580785,
+      "gzip": 180097,
+      "brotli": 155478
+    }
+  }
+}

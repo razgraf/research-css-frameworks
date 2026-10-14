@@ -1,0 +1,23 @@
+/* Declared first so StyleX's layered output takes priority over the reset */
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+  }
+}
+
+@stylex;
+
+:root {
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}

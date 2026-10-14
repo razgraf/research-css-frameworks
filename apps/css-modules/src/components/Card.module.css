@@ -1,0 +1,68 @@
+.card {
+  composes: surface from "../theme/mixins.module.css";
+  container-type: inline-size;
+  padding: var(--spacing-6);
+  transition: border-color var(--duration-fast) var(--easing-standard);
+
+  &:hover {
+    border-color: var(--color-accent);
+  }
+
+  @media (--md) {
+    padding: var(--spacing-8);
+  }
+}
+
+.title {
+  margin: 0 0 var(--spacing-6);
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-bold);
+}
+
+.list {
+  display: grid;
+  gap: var(--spacing-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @media (--md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--spacing-3);
+
+  & svg {
+    width: var(--icon-size-medium);
+    height: var(--icon-size-medium);
+    color: var(--color-accent);
+  }
+}
+
+.itemTitle {
+  font-weight: var(--font-weight-medium);
+}
+
+.itemText {
+  margin: var(--spacing-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  line-height: 1.5;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-8);
+
+  /* Container queries can't use @custom-media; 400px = container-card-wide token */
+  @container (width >= 400px) {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}

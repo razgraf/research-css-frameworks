@@ -1,0 +1,33 @@
+{
+  "app": "next-yak",
+  "unit": "bytes",
+  "firstLoad": {
+    "html": {
+      "raw": 16628,
+      "gzip": 4037,
+      "brotli": 3464
+    },
+    "css": {
+      "raw": 8136,
+      "gzip": 2882,
+      "brotli": 2400
+    },
+    "js": {
+      "raw": 575070,
+      "gzip": 177157,
+      "brotli": 152912
+    }
+  },
+  "total": {
+    "css": {
+      "raw": 8685,
+      "gzip": 3231,
+      "brotli": 2663
+    },
+    "js": {
+      "raw": 591403,
+      "gzip": 181879,
+      "brotli": 157144
+    }
+  }
+}

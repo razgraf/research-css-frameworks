@@ -1,0 +1,26 @@
+{
+  "name": "linaria",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome check",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@linaria/core": "8.2.0",
+    "@linaria/react": "8.2.0",
+    "lucide-react": "1.57.0",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@wyw-in-js/nextjs": "2.5.2",
+    "typescript": "6.0.3"
+  }
+}
