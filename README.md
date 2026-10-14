@@ -219,12 +219,12 @@ Measured 2026-10-14 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 
 | App | Cold (no `.next`) | Warm (cached) | Peak RSS, cold (MB, largest process) |
 | --- | --- | --- | --- |
-| css-modules | 4.02 (4.42) | 2.32 (2.78) | 813 (833) |
-| tailwind | 3.98 (4.55) | 2.27 (2.40) | 812 (831) |
-| next-yak | 4.39 (4.60) | 2.20 (2.44) | 869 (887) |
-| linaria | 6.57 (6.86) | 2.83 (3.07) | 1409 (1431) |
-| stylex | 5.43 (5.70) | 2.26 (2.36) | 841 (862) |
-| panda | 4.37 (4.93) | 2.42 (2.49) | 816 (837) |
+| css-modules | 3.19 (3.52) | 1.83 (2.05) | 810 (829) |
+| tailwind | 3.13 (3.57) | 1.69 (1.88) | 808 (838) |
+| next-yak | 3.49 (3.81) | 1.67 (1.72) | 858 (874) |
+| linaria | 4.34 (4.52) | 2.13 (2.31) | 876 (901) |
+| stylex | 4.65 (4.88) | 1.72 (1.79) | 847 (869) |
+| panda | 3.40 (3.70) | 1.81 (1.95) | 812 (831) |
 
 ### First-load bytes for `/` (brotli)
 
@@ -241,12 +241,12 @@ Measured 2026-10-14 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 
 | App | Parse stylesheets | Recalculate style | Layout | FCP | LCP | Theme toggle recalc |
 | --- | --- | --- | --- | --- | --- | --- |
-| css-modules | 0.9 (1.3) | 4.0 (5.0) | 25.0 (28.4) | 70.0 (72.0) | 70.0 (72.0) | 3.1 (4.4) |
-| tailwind | 0.9 (1.3) | 4.5 (5.4) | 23.6 (41.1) | 68.0 (88.0) | 68.0 (88.0) | 5.7 (6.3) |
-| next-yak | 0.5 (1.3) | 3.3 (4.6) | 24.2 (31.7) | 68.0 (84.0) | 68.0 (84.0) | 2.8 (4.1) |
-| linaria | 0.5 (0.8) | 3.4 (4.8) | 25.1 (28.1) | 68.0 (72.0) | 68.0 (72.0) | 3.0 (4.6) |
-| stylex | 0.7 (1.0) | 3.9 (4.5) | 24.4 (41.6) | 72.0 (92.0) | 72.0 (92.0) | 3.4 (5.1) |
-| panda | 0.8 (1.0) | 3.7 (4.5) | 25.5 (38.5) | 72.0 (84.0) | 72.0 (84.0) | 3.5 (5.0) |
+| css-modules | 0.5 (1.2) | 3.7 (6.7) | 22.7 (24.6) | 66.0 (68.0) | 66.0 (68.0) | 3.2 (4.5) |
+| tailwind | 1.0 (1.3) | 4.2 (5.4) | 25.0 (27.4) | 72.0 (76.0) | 72.0 (76.0) | 4.9 (5.9) |
+| next-yak | 0.7 (0.9) | 3.4 (4.4) | 23.9 (26.5) | 68.0 (72.0) | 68.0 (72.0) | 2.6 (3.8) |
+| linaria | 0.5 (0.9) | 3.2 (4.2) | 24.0 (26.1) | 68.0 (72.0) | 68.0 (72.0) | 2.7 (3.5) |
+| stylex | 0.7 (1.0) | 3.5 (3.8) | 22.7 (24.5) | 64.0 (72.0) | 64.0 (72.0) | 3.2 (4.3) |
+| panda | 0.8 (1.2) | 4.3 (5.8) | 27.9 (33.8) | 80.0 (104.0) | 80.0 (104.0) | 4.2 (5.3) |
 
 <!-- bench:end -->
 
@@ -254,14 +254,14 @@ Measured 2026-10-14 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 
 - **Bundle size barely separates them.** CSS is 2 to 4 KB everywhere, and roughly 149 KB of JS is the Next/React baseline. The JS deltas come from the one client component (`ThemeToggle`), which pulls in each library's runtime helper: `stylex.props` and yak (+0.8 KB), Linaria's `styled` (+2.2 KB), and Panda's `css()` and `cx` (+5.2 KB, because Panda computes class names at runtime). Server components ship no styling JS in any app. The more client components you style, the more these deltas matter.
 - **Tailwind ships the most CSS**, 3.7 KB against 2.2 to 2.8 KB for the rest. That's preflight plus one utility per value used.
-- **The browser can't tell them apart.** Parse, style recalculation, layout, FCP and LCP all fall within run-to-run noise (differences under 1 ms with overlapping p95s). The one outlier is Tailwind's theme-toggle recalculation (5.7 ms vs about 3 ms elsewhere), likely from the `:where([data-theme=light] *)` variant on the icons. That's real but tiny.
-- **Build time is the only meaningful difference.** CSS Modules, Tailwind, next-yak and Panda are within about 0.4 s of each other cold. StyleX costs about 1.4 s more (Babel over every file), and Linaria about 2.5 s and 600 MB more (it executes style code in Node). With a warm cache, all six build in 2.2 to 2.8 s.
+- **The browser can't tell them apart.** Parse, style recalculation, layout, FCP and LCP all fall within noise. Between two full benchmark runs, the same app's FCP median moved by up to 8 ms (Panda went from 72 to 80 ms), which is more than the gap between any two apps. The one repeat outlier is Tailwind's theme-toggle recalculation, 4.9 to 5.7 ms against about 3 ms elsewhere in both runs, likely from the `:where([data-theme=light] *)` variant on the icons. That's real but tiny.
+- **Build time is the only meaningful difference.** Tailwind, CSS Modules, Panda and next-yak finish cold builds within 0.4 s of each other. Linaria costs about 1.2 s more (it executes style code in Node), and StyleX about 1.5 s more (Babel over every file). With a warm cache, all six build in 1.7 to 2.1 s.
 
 ## Problems hit during setup
 
 **All apps**
-- TypeScript 7.0.2, the native Go compiler, ships no `tsserver` or JS compiler API. I pinned 6.0.3 before testing it. A later test showed that `next build` works fine on 7. See the last section.
-- TypeScript 6 no longer includes `@types/*` automatically, so the bench `tsconfig.json` needs `"types": ["node"]`.
+- TypeScript 7.0.2 ships no `tsserver` or JS compiler API, so tsserver plugins can't load on it. Builds and `tsc` are fine. See the last section.
+- Since TypeScript 6, `@types/*` packages aren't included automatically, so the bench `tsconfig.json` needs `"types": ["node"]`.
 - `biome migrate` (2.5.15) turned `"recommended": true` into `"preset": "none"`, which silently disables every lint rule. Set `"preset": "recommended"` by hand.
 - Container queries measure the content box. A 448px threshold never matched at 1280px because the card content is about 430px wide, so I changed the token to 400px.
 - Tailwind's preflight gives buttons `font: inherit` and the body `line-height: 1.5`. Without matching those in every app, the other five drifted by about 2px. They're now part of the shared base styles.
@@ -308,7 +308,7 @@ Measured 2026-10-14 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 **For a styled-components codebase that prefers template literals, use next-yak.**
 
 - Existing code mostly ports as-is. `styled`, `css` mixins, `${props => …}` variants, component selectors, nesting and media queries inside the wrapper all work the same. No other option here can say that.
-- It compiles with SWC, works on Turbopack for both dev and build, and costs about 0.4 s of build time and 0.8 KB of client JS here.
+- It compiles with SWC, works on Turbopack for both dev and build, and costs about 0.3 s of build time and 0.8 KB of client JS here.
 - The costs are real, and none of them blocks a migration:
   - Its cross-file constant parser is strict (identifier keys only, no `as const`).
   - Tokens are declared twice (CSS variables and TS refs).
@@ -319,20 +319,21 @@ Measured 2026-10-14 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 Where the others fit:
 
 - **CSS Modules** if you'd rather depend on nothing. It's native CSS with nesting, `@custom-media`, `@scope` and `:has()`, with no lock-in. Typed class names cost a codegen step, and container queries can't use tokens. It's also the fallback if next-yak stalls, since yak compiles to `.yak.module.css` files anyway.
-- **Linaria** gives the same authoring as yak plus real JS evaluation at build time. You give up conditional variant blocks (data attributes instead), mixins become untyped strings, and builds are the slowest and most memory-hungry. Choose it over yak only if computed styles matter.
-- **StyleX** if the compiler must enforce the design system. It has typed style contracts, deterministic merging and the strongest guardrails for agents. You give up template literals, descendant selectors (component APIs change to fit) and some build speed.
+- **Linaria** gives the same authoring as yak plus real JS evaluation at build time. You give up conditional variant blocks (data attributes instead), mixins become untyped strings, and cold builds take about 1.2 s longer. Choose it over yak only if computed styles matter.
+- **StyleX** if the compiler must enforce the design system. It has typed style contracts, deterministic merging and the strongest guardrails for agents. You give up template literals, descendant selectors (component APIs change to fit) and about 1.5 s per cold build, the most of the six.
 - **Panda** for typed tokens and recipes with `strictTokens`. It's object syntax again (template literals are gone in v2), with a codegen step, and it ships the most client JS of the six.
 - **Tailwind** doesn't fit the stated preferences, and nothing here contradicts the class-soup notes. Variants need `cva`, merges need `tailwind-merge` configured with duplicated token names, and media queries live on every element.
 
-## Moving to TypeScript 7
+## TypeScript 7
 
-TypeScript 7.0.2 is the Go port of the compiler. I pinned 6.0.3 at the start because the `typescript` 7 package has no `lib/tsserverlibrary.js` and no stable JS API, and I assumed Next.js depended on both. I then tested each app with `typescript@7.0.2` in a throwaway copy, and that assumption was wrong for the build.
+Every app and the bench run on TypeScript 7.0.2, the Go port of the compiler. I started on 6.0.3 because the 7 package has no `lib/tsserverlibrary.js` and no stable JS API, and I assumed Next.js needed both. Testing showed that only editor plugins need them.
 
-What I checked, per app:
+What works on 7, in all six apps:
 
-- `next build` passes in all six. Next 16.4 type-checks by running the `tsc` CLI, and a planted `const x: number = "nope"` failed the build with TS2322, so checking is real.
-- `tsc --noEmit` passes in all six, including the `@ts-expect-error` guards in the StyleX and Panda showcases. Both still reject what they should.
-- The CSS Modules class-name typo still fails `tsc` (TS2551). That check comes from the `.d.ts` files `typed-css-modules` generates, not from the compiler API.
+- `next build`. Next 16.4 type-checks by running the `tsc` CLI, and a planted `const x: number = "nope"` failed the build with TS2322.
+- `tsc --noEmit`, including the `@ts-expect-error` guards in the StyleX and Panda showcases, which still reject what they should.
+- The CSS Modules class-name typo check (TS2551). It comes from the `.d.ts` files `typed-css-modules` generates.
+- Every styling tool. Panda codegen, StyleX's Babel plugin, wyw (oxc) and next-yak (SWC) don't use the TypeScript API, and neither does Biome.
 
 `tsc --noEmit` time, median of 5 runs with no incremental cache:
 
@@ -345,18 +346,25 @@ What I checked, per app:
 | stylex | 1.13 s | 0.20 s |
 | panda | 1.22 s | 0.24 s |
 
-That's about 6 times faster everywhere. StyleX and Panda gain the most in absolute terms because their generated types are the heaviest. On a codebase this small the win is under a second per check. On a large app the same ratio matters a lot more.
+That's about 6 times faster. On an app this small it saves under a second per check. On a large codebase the same ratio matters a lot more.
 
-What breaks:
+What the switch cost:
 
-- tsserver plugins. `typescript-plugin-css-modules` imports `typescript/lib/tsserverlibrary` and can't load. The CSS Modules app loses that plugin's editor completions but keeps typo errors and class-name completion through the generated `.d.ts` files, so it doesn't lose much. The `next` plugin listed in every `tsconfig.json` is a tsserver plugin too and stops loading in the editor.
-- The CSS Modules app's `.vscode/settings.json` points `typescript.tsdk` at `node_modules/typescript/lib`, which on 7 holds only `tsc.js`. That setting has to go, and the editor needs TypeScript 7's language server instead of the workspace `tsserver`. I didn't test editor behavior here.
+- `typescript-plugin-css-modules` is gone. It imports `typescript/lib/tsserverlibrary`, which 7 doesn't ship. The generated `.d.ts` files still give class-name completion and typo errors.
+- The `typescript.tsdk` setting is gone from `apps/css-modules/.vscode/settings.json`, because `node_modules/typescript/lib` now holds only `tsc.js`.
+- The `next` entry in each `tsconfig.json` is a tsserver plugin too. Next adds it back on build, and it does nothing on 7.
 
-What the switch would involve:
+Not verified: editor behavior (completion, hover, go-to-definition) with TypeScript 7's language server.
 
-1. Bump `typescript` to `7.0.2` in all six `package.json` files and the bench, as one change across all apps, as `CLAUDE.md` requires.
-2. Remove `typescript-plugin-css-modules` and the `typescript.tsdk` setting from `apps/css-modules`.
-3. Run `bun run lint && bun run typecheck && bun run build` in every app, then check autocomplete by hand in each editor setup.
+The benchmark tables above ran on 7.0.2. The same suite on 6.0.3 gave these cold builds:
 
-None of the six styling libraries depends on the TypeScript API at build time, so the choice of library doesn't change this. The cost is in editor plugins, and in this repo that's one optional plugin.
+| App | Cold build, TS 6.0.3 | Cold build, TS 7.0.2 | Peak RSS, 6.0.3 → 7.0.2 |
+| --- | --- | --- | --- |
+| css-modules | 4.02 s | 3.19 s | 813 → 810 MB |
+| tailwind | 3.98 s | 3.13 s | 812 → 808 MB |
+| next-yak | 4.39 s | 3.49 s | 869 → 858 MB |
+| linaria | 6.57 s | 4.34 s | 1409 → 876 MB |
+| stylex | 5.43 s | 4.65 s | 841 → 847 MB |
+| panda | 4.37 s | 3.40 s | 816 → 812 MB |
 
+Type-checking was a bigger share of `next build` than I expected. Most apps lost 0.8 to 1 s. Linaria lost 2.2 s and 530 MB of peak memory, so most of what I first blamed on WyW's build-time evaluation was the TypeScript 6 type check. Bundle sizes didn't change.

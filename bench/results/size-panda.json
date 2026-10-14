@@ -4,8 +4,8 @@
   "firstLoad": {
     "html": {
       "raw": 18340,
-      "gzip": 4508,
-      "brotli": 3881
+      "gzip": 4509,
+      "brotli": 3883
     },
     "css": {
       "raw": 12013,
