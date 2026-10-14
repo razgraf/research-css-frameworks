@@ -4,13 +4,13 @@
   "firstLoad": {
     "html": {
       "raw": 18880,
-      "gzip": 4456,
-      "brotli": 3823
+      "gzip": 4455,
+      "brotli": 3822
     },
     "css": {
-      "raw": 15132,
-      "gzip": 4284,
-      "brotli": 3793
+      "raw": 15160,
+      "gzip": 4295,
+      "brotli": 3781
     },
     "js": {
       "raw": 572802,
@@ -20,9 +20,9 @@
   },
   "total": {
     "css": {
-      "raw": 15132,
-      "gzip": 4284,
-      "brotli": 3793
+      "raw": 15160,
+      "gzip": 4295,
+      "brotli": 3781
     },
     "js": {
       "raw": 575313,

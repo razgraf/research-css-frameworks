@@ -21,6 +21,6 @@
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@wyw-in-js/nextjs": "2.5.2",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   }
 }

@@ -31,7 +31,7 @@ Use these exact versions in every app that needs them. Don't upgrade mid-project
 |---|---|---|---|
 | next | 16.4.0 | @biomejs/biome | 2.5.15 |
 | react / react-dom | 19.3.0 | @types/react | 19.3.0 |
-| typescript | 6.0.3 (see note) | @types/node | 26.6.5 |
+| typescript | 7.0.2 (see note) | @types/node | 26.6.5 |
 | lucide-react | 1.57.0 | postcss | 8.5.30 |
 | tailwindcss / @tailwindcss/postcss | 4.3.3 | class-variance-authority | 0.7.1 |
 | clsx | 2.1.1 | tailwind-merge | 3.7.0 |
@@ -39,10 +39,10 @@ Use these exact versions in every app that needs them. Don't upgrade mid-project
 | @linaria/core / @linaria/react | 8.2.0 | @stylexjs/stylex / babel-plugin / postcss-plugin | 0.19.1 |
 | @pandacss/dev / @pandacss/preset-base | 2.2.0 | postcss-custom-media | 12.0.3 |
 | @csstools/postcss-global-data | 4.0.0 | typed-css-modules | 0.9.1 |
-| typescript-plugin-css-modules | 5.2.0 | playwright (bench) | 1.64.1 |
+| playwright (bench) | 1.64.1 | | |
 
 Toolchain: Node 24.15.0, bun 1.3.13, hyperfine (brew).
-TypeScript note: latest is 7.0.2 (native Go compiler). It can't load tsserver plugins (`typescript-plugin-css-modules`); Next 16.4 builds and type-checks with it. Pinned 6.0.3; see README "Moving to TypeScript 7".
+TypeScript note: 7.0.2 is the native Go compiler. Next 16.4 builds and type-checks with it. It can't load tsserver plugins, so `typescript-plugin-css-modules` was removed; see README "TypeScript 7".
 
 ## Design spec (identical in all apps)
 
@@ -130,14 +130,14 @@ Scripts: `dev`, `build`, `start`, `lint` (`biome check`), `typecheck` (`tsc --no
 ## Per-framework spec
 | | Tokens + theme | Breakpoints | Mixins | Variants | Config / tooling |
 |---|---|---|---|---|---|
-| **css-modules** | `theme/tokens.css`: `:root` (dark) + `[data-theme=light]` vars | `theme/breakpoints.css` `@custom-media --md (width >= 768px)`; injected globally by `@csstools/postcss-global-data` + `postcss-custom-media` | `composes: surface from "../theme/mixins.module.css"` | `styles[variant]`, `styles[size]` class lookup | `postcss.config.mjs`; **typed-css-modules** (`tcm src`, `--watch` in dev, runs before `typecheck`/`build`) + `typescript-plugin-css-modules` for the editor. Verify that the generated `.d.ts` overrides Next's `*.module.css` wildcard so a bad class fails `tsc` |
+| **css-modules** | `theme/tokens.css`: `:root` (dark) + `[data-theme=light]` vars | `theme/breakpoints.css` `@custom-media --md (width >= 768px)`; injected globally by `@csstools/postcss-global-data` + `postcss-custom-media` | `composes: surface from "../theme/mixins.module.css"` | `styles[variant]`, `styles[size]` class lookup | `postcss.config.mjs`; **typed-css-modules** (`tcm src`, `--watch` in dev, runs before `typecheck`/`build`) only (no tsserver plugin on TS 7). Verify that the generated `.d.ts` overrides Next's `*.module.css` wildcard so a bad class fails `tsc` |
 | **tailwind** v4.3 | `globals.css` `@theme` primitives; semantic vars in `:root` / `[data-theme=light]` mapped through `@theme inline` | `@theme { --breakpoint-*: initial; --breakpoint-sm/md/lg }`; `@container` + `@[400px]:` | `@utility surface`, `@utility focus-ring` | `cva` + `cn` (clsx + tailwind-merge, extended to know the custom utilities) | `@tailwindcss/postcss`; Biome `css.parser.tailwindDirectives: true`; `@custom-variant dark` only if needed |
 | **next-yak** 9.10 | `globals.css` vars (dark/light) + `theme/tokens.ts` typed refs (`color.accent = "var(--color-accent)"`) used as `${color.accent}` | `theme/breakpoints.ts` `media.md = "@media (min-width: 768px)"`. Test a plain `.ts` import first, fall back to `*.yak.ts` | `export const surface = css\`…\`` → `${surface}` | `${({$variant}) => $variant === "secondary" && css\`…\`}` (transient props) | `withYak()`; Biome `experimentalEmbeddedSnippetsEnabled` |
 | **linaria** | same as yak (globals.css vars + typed refs) | TS constants interpolated (wyw evaluates them at build time) | Plain string/template constant interpolated. Note: interpolating a `css` class embeds a selector, not rules. Verify and document | `&[data-variant="secondary"]` / `data-size` attribute selectors. Linaria prop interpolation can only set values, not conditional blocks. Document | `@wyw-in-js/nextjs` `withWyw()`; gitignore `*.wyw-in-js.module.css`; Biome embed flag |
 | **stylex** 0.19 | `theme/tokens.stylex.ts` `defineVars` with `--`-prefixed keys (stable names), light overrides in `globals.css` under `[data-theme=light]` | `theme/breakpoints.stylex.ts` `defineConsts` with **overlapping mobile-first `min-width`** queries (same as the other apps) → `[bp.md]: …`. Ordering isn't guaranteed (`enableMediaQueryOrder` doesn't cover `defineConsts`); the spike checks it, and the README logs the risk | Shared `stylex.create` objects composed via `stylex.props(mixins.surface, styles.card)` | `stylex.props(styles.base, variants[variant], sizes[size])` | `babel.config.js` + `@stylexjs/babel-plugin` + `@stylexjs/postcss-plugin`, `@stylex;` in globals. **Not** `@stylexjs/nextjs-plugin` (deprecated) |
 | **panda** v2.2 | `panda.config.ts` `theme.tokens` + `semanticTokens {base: dark, _light: light}`, condition `light: '[data-theme=light] &'`; only `@pandacss/preset-base` (no default tokens) | `theme.breakpoints` | `layerStyles.surface`; `focusRing` via `css.raw()` composition | config `recipes.button` (typed variants) | `panda init --postcss`, `prepare: panda codegen`, gitignore `styled-system`; object syntax (template literals were removed in v2, explained in README) |
 
-VSCode recommendations (per app `.vscode/extensions.json`): all apps get `biomejs.biome`. Tailwind: `bradlc.vscode-tailwindcss`. yak/linaria: `styled-components.vscode-styled-components`. css-modules: `clinyong.vscode-css-modules` + `typescript.tsdk` workspace setting (needed for the TS plugin). panda: `chakra-ui.panda-css-vscode` (v2 compat unverified, document). stylex: none (TS types only).
+VSCode recommendations (per app `.vscode/extensions.json`): all apps get `biomejs.biome`. Tailwind: `bradlc.vscode-tailwindcss`. yak/linaria: `styled-components.vscode-styled-components`. css-modules: `clinyong.vscode-css-modules`. panda: `chakra-ui.panda-css-vscode` (v2 compat unverified, document). stylex: none (TS types only).
 
 Biome (per app `biome.json`): recommended lint + formatter. Ignore `.next`, `styled-system`, `*.wyw-in-js.module.css`, `*.module.css.d.ts`. Record which template-literal blocks get formatted vs skipped (anything with `${}` is skipped).
 
@@ -177,7 +177,7 @@ Setup/run → requirement matrix (rows = PRD criteria plus RSC and template lite
 Per app: `bun run lint && bun run typecheck && bun run build`, then `next start`. Eyeball at 375/768/1280 × dark/light, toggle + reload (no flash), keyboard focus ring, container-query footer. css-modules: typo a class name and confirm `tsc` fails. Showcases: confirm the advertised guard actually fires (StyleX disallowed prop → `tsc` error; Panda raw hex → `tsc` error; Tailwind `bg-red-500` → no CSS emitted). Bench: `bun bench/run.ts` runs all four steps and produces the README tables.
 
 ## Deviations during implementation
-- TypeScript stays on 6.0.3. 7.0.2 has no tsserver/JS API, so tsserver plugins can't load, but a later test showed `next build` and `tsc` pass on 7 in all apps (README: "Moving to TypeScript 7").
+- TypeScript moved from 6.0.3 to 7.0.2 after testing showed `next build` and `tsc` pass in all apps. `typescript-plugin-css-modules` (a tsserver plugin) was dropped; class-name types come from typed-css-modules. Benchmarks re-run on 7: cold builds 0.8–2.2 s faster.
 - Container breakpoint `container-card-wide` 448px → 400px (the query measures the card's content box).
 - Shared base spec gained `line-height: 1.5` and `button { font: inherit; color: inherit }` to match Tailwind's preflight.
 - tailwind: semantic colors are `@theme` variables overridden under `[data-theme=light]` (no `@theme inline`).
