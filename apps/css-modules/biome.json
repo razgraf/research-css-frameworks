@@ -1,13 +1,14 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-  "files": { "includes": ["**", "!.css-types", "!next-env.d.ts"] },
+  "files": { "includes": ["**", "!next-env.d.ts"] },
   "css": { "parser": { "cssModules": true } },
   "formatter": { "indentStyle": "space", "lineWidth": 100 },
   "linter": {
     "rules": {
       "preset": "recommended",
-      "nursery": { "noUndeclaredCustomProperties": "error" }
+      "nursery": { "noUndeclaredCustomProperties": "error" },
+      "style": { "noDescendingSpecificity": "error" }
     }
   },
   "assist": { "actions": { "source": { "organizeImports": "on", "useSortedProperties": "on" } } },

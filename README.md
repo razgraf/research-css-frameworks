@@ -64,9 +64,9 @@ All six apps render the same page pixel for pixel. Screenshots at 375, 768 and 1
 | Native CSS / template literals | ✅ plain CSS | ❌ | ✅ | ✅ | ❌ objects | ❌ objects (template literals removed in v2) |
 | Biome lint + format | ✅ CSS, CSS Modules, `@custom-media` | ✅ with `tailwindDirectives` | ⚠️ CSS inside `${}` templates isn't formatted | ⚠️ same as yak | ✅ (allow-list `@stylex`) | ✅ |
 | Editor autocomplete/highlighting | ✅ CSS language service + class names | ✅ Tailwind IntelliSense | ⚠️ styled-components extension (last update 2023) | ⚠️ same as yak | ✅ via TS types | ✅ via TS types (v2 extension unverified) |
-| Type-safety | ✅ typo in a class name fails `tsc` (`tcm`) | ⚠️ only `cva` props are typed | ⚠️ token refs only | ⚠️ token refs only | ✅ typed style contracts | ✅ `strictTokens`, typed recipes |
+| Type-safety | ⚠️ none for class names: Next types every module as `{ [key: string]: string }` | ⚠️ only `cva` props are typed | ⚠️ token refs only | ⚠️ token refs only | ✅ typed style contracts | ✅ `strictTokens`, typed recipes |
 | Turbopack (`dev` + `build`) | ✅ | ✅ | ✅ | ✅ | ✅ (Babel runs on all app code) | ✅ |
-| Setup | PostCSS + 2 plugins + `tcm` | 1 PostCSS plugin | 1 config wrapper | 1 config wrapper | Babel + PostCSS config, layer ordering | config + codegen (~130 generated files) |
+| Setup | PostCSS + 2 plugins | 1 PostCSS plugin | 1 config wrapper | 1 config wrapper | Babel + PostCSS config, layer ordering | config + codegen (~130 generated files) |
 
 ## Side by side
 
@@ -273,8 +273,7 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 **CSS Modules**
 - `@custom-media` needs `postcss-custom-media` plus `@csstools/postcss-global-data` to make one breakpoints file visible everywhere. It works under Turbopack.
 - `@custom-media` only applies to `@media`; the container query needs the literal `400px`.
-- `typed-css-modules` writes `.d.ts` files for every `.css` file unless you pass `-p "src/**/*.module.css"`. The generated files do override Next's `*.module.css` wildcard, so a typo fails `tsc`.
-- To keep those `.d.ts` files out of `src/`, `tcm -o .css-types` writes them to a gitignored folder, and `"rootDirs": [".", ".css-types"]` in `tsconfig.json` lets TypeScript find them next to their sources. The typo check still works.
+- Class names aren't type-checked. Next declares every `*.module.css` as `{ [key: string]: string }`, so `styles.itemTitel` passes `tsc` and the element silently renders without its class. Catching that in `tsc` takes generated `.d.ts` files from a tool like `typed-css-modules` or css-modules-kit. I tried `typed-css-modules` and dropped it to avoid the extra generation step.
 - Biome's `noUndeclaredCustomProperties` (nursery) catches a misspelled `var(--…)`. It only counts variables it can see, so every module starts with `@import "@/theme/tokens.css"`. In practice one importing module is enough for the whole project, but the per-file import makes each file explicit. Turbopack deduplicates the import, so the token block ships once. `tokens.css` turns the rule off, because `--font-geist-*` comes from `next/font` at runtime.
 - `var(--` autocomplete comes from the CSS Variables extension (`cssVariables.lookupFiles`), not from the imports.
 - VS Code doesn't resolve `@/` in CSS by default. The hidden setting `"css.importAliases": { "@/": "/src/" }` makes `@import` paths clickable when `apps/css-modules` is the open folder. `composes … from` paths are never links, relative or aliased.
@@ -329,7 +328,7 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 
 Where the others fit:
 
-- **CSS Modules** if you'd rather depend on nothing. It's native CSS with nesting, `@custom-media`, `@scope` and `:has()`, with no lock-in. Typed class names cost a codegen step, and container queries can't use tokens. It's also the fallback if next-yak stalls, since yak compiles to `.yak.module.css` files anyway.
+- **CSS Modules** if you'd rather depend on nothing. It's native CSS with nesting, `@custom-media`, `@scope` and `:has()`, with no lock-in. Class names aren't type-checked unless you add a codegen step, and container queries can't use tokens. It's also the fallback if next-yak stalls, since yak compiles to `.yak.module.css` files anyway.
 - **Linaria** gives the same authoring as yak plus real JS evaluation at build time. You give up conditional variant blocks (data attributes instead), mixins become untyped strings, and cold builds take about 1.1 s longer. Choose it over yak only if computed styles matter.
 - **StyleX** if the compiler must enforce the design system. It has typed style contracts, deterministic merging and the strongest guardrails for agents. You give up template literals, descendant selectors (component APIs change to fit) and about 1.5 s per cold build, the most of the six.
 - **Panda** for typed tokens and recipes with `strictTokens`. It's object syntax again (template literals are gone in v2), with a codegen step, and it ships the most client JS of the six.
@@ -343,7 +342,6 @@ What works on 7, in all six apps:
 
 - `next build`. Next 16.4 type-checks by running the `tsc` CLI, and a planted `const x: number = "nope"` failed the build with TS2322.
 - `tsc --noEmit`, including the `@ts-expect-error` guards in the StyleX and Panda showcases, which still reject what they should.
-- The CSS Modules class-name typo check (TS2551). It comes from the `.d.ts` files `typed-css-modules` generates.
 - Every styling tool. Panda codegen, StyleX's Babel plugin, wyw (oxc) and next-yak (SWC) don't use the TypeScript API, and neither does Biome.
 
 `tsc --noEmit` time, median of 5 runs with no incremental cache:
@@ -379,3 +377,58 @@ The benchmark tables above ran on 7.0.2. The same suite on 6.0.3 gave these cold
 | panda | 4.37 s | 3.40 s | 816 → 812 MB |
 
 Type-checking was a bigger share of `next build` than I expected. Most apps lost 0.8 to 1 s. Linaria lost 2.2 s and 530 MB of peak memory, so most of what I first blamed on WyW's build-time evaluation was the TypeScript 6 type check. Bundle sizes didn't change.
+
+## Developer experience
+
+Open each app in its own VS Code window (`code apps/<name>`) so its `.vscode/` settings and extension recommendations apply.
+
+### CSS Modules
+
+What's set up in `apps/css-modules`:
+
+| Need | How | Where |
+| --- | --- | --- |
+| Class-name autocomplete and go to definition | `clinyong.vscode-css-modules` suggests class names after `styles.` and jumps from `styles.card` to `.card`. It works only in the editor and doesn't type-check, so a misspelled class still passes `tsc` | `.vscode/extensions.json` |
+| `var(--…)` autocomplete | `vunguyentuan.vscode-css-variables`, pointed at the tokens with `"cssVariables.lookupFiles": ["src/theme/tokens.css"]` | `.vscode/settings.json` |
+| Undefined variables fail lint | Every `.css` file starts with `@import "@/theme/tokens.css";`, so Biome's nursery rule `noUndeclaredCustomProperties` can see the declarations. `var(--color-acent)` is reported as not defined. The rule is off for `tokens.css` itself, because that file uses `--font-geist-*` variables that `next/font` defines at runtime. Turbopack deduplicates the import, so tokens appear once in the built CSS | each `.module.css`, `biome.json` |
+| `@custom-media` and `composes` without editor warnings | `.vscode/css-data.json` describes `@custom-media` and `composes` as custom CSS data, loaded with `"css.customData"`. `"files.associations": { "*.css": "css" }` keeps `.css` files on VS Code's built-in CSS language service, which is the one that reads custom data. `csstools.postcss` is recommended for PostCSS syntax support | `.vscode/css-data.json`, `.vscode/settings.json`, `.vscode/extensions.json` |
+| `@/` paths in CSS | `composes: surface from "@/theme/mixins.module.css"` and `@import "@/theme/tokens.css"` resolve through the `tsconfig.json` alias at build time. `"css.importAliases": { "@/": "/src/" }` lets VS Code follow them | CSS files, `.vscode/settings.json` |
+| Breakpoints without imports | `@csstools/postcss-global-data` injects `src/theme/breakpoints.css` into every file, so `@media (--md)` works anywhere | `postcss.config.mjs` |
+| Consistent property order | Biome's `useSortedProperties` assist, applied on save | `biome.json`, `.vscode/settings.json` |
+| Specificity mistakes | Biome's `noDescendingSpecificity` flags a lower-specificity selector placed after a higher one | `biome.json` |
+
+Things to know:
+
+- Nothing checks class names at build time. Next types every module as `{ [key: string]: string }`, so a typo like `styles.itemTitel` compiles and the element silently loses its styles. The extension's suggestions make typos less likely but don't stop them. Generated declarations from `typed-css-modules` or css-modules-kit would bring the check back, at the cost of running a generator in `dev`, `build` and `typecheck`.
+- Biome's nursery rule `noUnusedClasses` doesn't understand `styles.x` and reports every class as unused, so it's no use here.
+
+Worth adding as the app grows:
+
+- Cascade layers for overrides. Put component styles in `@layer components` and keep consumer overrides unlayered, so an override wins regardless of CSS chunk order. `composes` can't sit inside `@layer`, so each class splits into a top-level `composes`-only rule plus a layered body.
+- `noImportantStyles` and the nursery rule `noExcessiveSelectorClasses` in Biome, to keep specificity flat.
+- A per-route CSS size budget. `bench/size.ts` already measures first-load CSS for `/`. Turbopack's `experimental.cssChunking: "graph"` reduces unused CSS per route once Lighthouse starts reporting it.
+
+### StyleX
+
+What's set up in `apps/stylex`:
+
+| Need | How | Where |
+| --- | --- | --- |
+| One import for tokens and the API | `src/theme/index.stylex.ts` holds the palette, breakpoints and nested tokens, and re-exports `stylex`. The Babel plugin's `importSources` includes `{ from: "@/theme/index.stylex", as: "stylex" }`, so the compiler treats that re-export as StyleX itself. Components import `{ stylex, theme, media }` from one path | `src/theme/index.stylex.ts`, `babel.config.js` |
+| Nested token access | `stylex.unstable_defineVarsNested` gives `theme.colors.accent` and `theme.sizes.spacing[6]` instead of one export per group. The API is marked unstable, so its name can change between releases | `src/theme/index.stylex.ts` |
+| No `{...stylex.props()}` on HTML elements | The compiler turns `sx={styles.x}` on lowercase elements into `stylex.props`. `src/sx.d.ts` adds `sx?: StyleXStyles` to React's `HTMLAttributes` so TypeScript accepts it. Components such as Lucide icons still need `{...stylex.props()}`, because `sx` only works on host elements | `src/sx.d.ts`, all components |
+| Autocomplete and typo checks | Everything is TypeScript. Tokens, breakpoints and CSS properties complete through types, and a misspelled token or property fails `tsc`. No editor extension is needed | none |
+| Style contracts | `StyleXStyles<{ marginBlock?, inlineSize?, maxInlineSize? }>` limits what callers can override. Passing `color` fails `tsc` (see `/showcase`) | `src/showcase/TripCard.tsx` |
+| Formatting | Styles are plain objects, so Biome formats and lints all of them. The only exception is the `@stylex;` directive, which is allow-listed in `noUnknownAtRules` | `biome.json` |
+| Resets that don't override StyleX | StyleX emits everything inside `@layer`, so the reset sits in `@layer reset`, declared before `@stylex;` | `src/app/globals.css` |
+| Theme switching | Token values use `light-dark()`, and `[data-theme]` switches `color-scheme`. The theme icons use `stylex.when.ancestor('[data-theme="light"]')`, which needs the `stylex.defaultMarker()` class on `<html>` | `src/theme/index.stylex.ts`, `src/app/globals.css`, `src/app/layout.tsx` |
+
+Things to know:
+
+- StyleX's docs say `.stylex.ts` files may only export `defineVars` and `defineConsts`. Re-exporting `stylex` from one works here because of the `importSources` entry, but the official ESLint rule `@stylexjs/enforce-extension` would flag it. Re-run lint, typecheck and build on every StyleX upgrade.
+- `stylex.when.*` calls must be written inline inside `stylex.create`. Moving one into a constant fails prerendering with "Unexpected 'stylex.when.ancestor' call at runtime".
+- There are no descendant selectors, so parents can't style children like an `svg`. `Button` takes an `icon` prop instead.
+
+Worth adding:
+
+- `@stylexjs/eslint-plugin` checks property values and sorts keys, which Biome can't do for StyleX. It means running ESLint next to Biome, which this repo avoids, so it's a trade-off rather than a free win.

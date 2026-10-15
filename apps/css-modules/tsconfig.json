@@ -4,7 +4,6 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "strict": true,
     "noEmit": true,
-    "rootDirs": [".", ".css-types"],
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
