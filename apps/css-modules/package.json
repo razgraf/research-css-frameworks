@@ -2,11 +2,11 @@
   "name": "css-modules",
   "private": true,
   "scripts": {
-    "dev": "tcm -p \"src/**/*.module.css\" --watch & next dev",
-    "build": "tcm -p \"src/**/*.module.css\" && next build",
+    "dev": "tcm -p \"src/**/*.module.css\" -o .css-types --watch & next dev",
+    "build": "tcm -p \"src/**/*.module.css\" -o .css-types && next build",
     "start": "next start",
     "lint": "biome check",
-    "typecheck": "tcm -p \"src/**/*.module.css\" && tsc --noEmit"
+    "typecheck": "tcm -p \"src/**/*.module.css\" -o .css-types && tsc --noEmit"
   },
   "dependencies": {
     "lucide-react": "1.57.0",

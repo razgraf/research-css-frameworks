@@ -1,4 +1,4 @@
 .next
 next-env.d.ts
 *.tsbuildinfo
-src/**/*.module.css.d.ts
+.css-types

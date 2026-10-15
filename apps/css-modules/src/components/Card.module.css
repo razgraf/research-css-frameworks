@@ -1,3 +1,5 @@
+@import "@/theme/tokens.css";
+
 .card {
   composes: surface from "../theme/mixins.module.css";
   container-type: inline-size;
