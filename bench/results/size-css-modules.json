@@ -3,14 +3,14 @@
   "unit": "bytes",
   "firstLoad": {
     "html": {
-      "raw": 16928,
-      "gzip": 4089,
-      "brotli": 3518
+      "raw": 17108,
+      "gzip": 4093,
+      "brotli": 3510
     },
     "css": {
       "raw": 10680,
-      "gzip": 2932,
-      "brotli": 2556
+      "gzip": 2878,
+      "brotli": 2548
     },
     "js": {
       "raw": 572821,
@@ -21,8 +21,8 @@
   "total": {
     "css": {
       "raw": 10680,
-      "gzip": 2932,
-      "brotli": 2556
+      "gzip": 2878,
+      "brotli": 2548
     },
     "js": {
       "raw": 575332,

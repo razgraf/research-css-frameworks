@@ -1,6 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 
-export { stylex };
+export { stylex }; // FYI This breaks a documented rule that we cannot export anything other than tokens from a tokens file
 
 export const palette = stylex.defineConsts({
   neutral950: "#0b0d12",
@@ -61,8 +61,13 @@ export const theme = stylex.unstable_defineVarsNested({
     radius: { small: "6px", medium: "12px", large: "20px", full: "9999px" },
     icon: { small: "16px", medium: "20px" },
   },
-  motion: { durationFast: "150ms", easingStandard: "cubic-bezier(0.2, 0, 0, 1)" },
-  shadows: { card: "0 8px 24px light-dark(rgb(16 18 24 / 0.08), rgb(0 0 0 / 0.4))" },
+  motion: {
+    durationFast: "150ms",
+    easingStandard: "cubic-bezier(0.2, 0, 0, 1)",
+  },
+  shadows: {
+    card: "0 8px 24px light-dark(rgb(16 18 24 / 0.08), rgb(0 0 0 / 0.4))",
+  },
 });
 
 export const media = stylex.defineConsts({
