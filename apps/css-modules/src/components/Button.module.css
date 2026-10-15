@@ -1,5 +1,7 @@
+@import "@/theme/tokens.css";
+
 .button {
-  composes: focusRing from "../theme/mixins.module.css";
+  composes: focusRing from "@/theme/mixins.module.css";
   display: inline-flex;
   align-items: center;
   justify-content: center;

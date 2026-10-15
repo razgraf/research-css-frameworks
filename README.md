@@ -274,6 +274,12 @@ Measured 2026-10-14 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 - `@custom-media` needs `postcss-custom-media` plus `@csstools/postcss-global-data` to make one breakpoints file visible everywhere. It works under Turbopack.
 - `@custom-media` only applies to `@media`; the container query needs the literal `400px`.
 - `typed-css-modules` writes `.d.ts` files for every `.css` file unless you pass `-p "src/**/*.module.css"`. The generated files do override Next's `*.module.css` wildcard, so a typo fails `tsc`.
+- To keep those `.d.ts` files out of `src/`, `tcm -o .css-types` writes them to a gitignored folder, and `"rootDirs": [".", ".css-types"]` in `tsconfig.json` lets TypeScript find them next to their sources. The typo check still works.
+- Biome's `noUndeclaredCustomProperties` (nursery) catches a misspelled `var(--…)`. It only counts variables it can see, so every module starts with `@import "@/theme/tokens.css"`. In practice one importing module is enough for the whole project, but the per-file import makes each file explicit. Turbopack deduplicates the import, so the token block ships once. `tokens.css` turns the rule off, because `--font-geist-*` comes from `next/font` at runtime.
+- `var(--` autocomplete comes from the CSS Variables extension (`cssVariables.lookupFiles`), not from the imports.
+- VS Code doesn't resolve `@/` in CSS by default. The hidden setting `"css.importAliases": { "@/": "/src/" }` makes `@import` paths clickable when `apps/css-modules` is the open folder. `composes … from` paths are never links, relative or aliased.
+- The PostCSS Language Support extension claims every `.css` file, which disables VS Code's CSS features and Biome in the editor. `"files.associations": { "*.css": "css" }` takes them back, and `.vscode/css-data.json` declares `composes` and `@custom-media` so CSS mode doesn't flag them.
+- In the editor, Biome flagged `:global` as an unknown pseudo-class, while the CLI didn't. `"css": { "parser": { "cssModules": true } }` in `biome.json` fixes it.
 
 **Tailwind**
 - A token named `--color-text-primary` becomes the class `text-text-primary`.

@@ -1,4 +1,8 @@
 {
   "editor.defaultFormatter": "biomejs.biome",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "files.associations": { "*.css": "css" },
+  "css.customData": [".vscode/css-data.json"],
+  "css.importAliases": { "@/": "/src/" },
+  "cssVariables.lookupFiles": ["src/theme/tokens.css"]
 }

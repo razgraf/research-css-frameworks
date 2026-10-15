@@ -1,3 +1,7 @@
 {
-  "recommendations": ["biomejs.biome", "clinyong.vscode-css-modules"]
+  "recommendations": [
+    "biomejs.biome",
+    "clinyong.vscode-css-modules",
+    "vunguyentuan.vscode-css-variables"
+  ]
 }

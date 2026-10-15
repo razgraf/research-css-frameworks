@@ -1,8 +1,22 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-  "files": { "includes": ["**", "!**/*.module.css.d.ts", "!next-env.d.ts"] },
+  "files": { "includes": ["**", "!.css-types", "!next-env.d.ts"] },
+  "css": { "parser": { "cssModules": true } },
   "formatter": { "indentStyle": "space", "lineWidth": 100 },
-  "linter": { "rules": { "preset": "recommended" } },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } }
+  "linter": {
+    "rules": {
+      "preset": "recommended",
+      "nursery": { "noUndeclaredCustomProperties": "error" }
+    }
+  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "overrides": [
+    {
+      "includes": ["src/theme/tokens.css"],
+      "linter": {
+        "rules": { "nursery": { "noUndeclaredCustomProperties": "off" } }
+      }
+    }
+  ]
 }

@@ -1,5 +1,7 @@
+@import "@/theme/tokens.css";
+
 .card {
-  composes: surface from "../theme/mixins.module.css";
+  composes: surface from "@/theme/mixins.module.css";
   container-type: inline-size;
   padding: var(--spacing-6);
   transition: border-color var(--duration-fast) var(--easing-standard);

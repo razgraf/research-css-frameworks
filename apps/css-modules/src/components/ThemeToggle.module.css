@@ -1,5 +1,7 @@
+@import "@/theme/tokens.css";
+
 .toggle {
-  composes: focusRing from "../theme/mixins.module.css";
+  composes: focusRing from "@/theme/mixins.module.css";
   display: grid;
   place-items: center;
   width: 40px;
