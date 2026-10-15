@@ -1,9 +1,8 @@
 "use client";
 
-import * as stylex from "@stylexjs/stylex";
 import { Moon, Sun } from "lucide-react";
+import { stylex, theme } from "@/theme/index.stylex";
 import { mixins } from "@/theme/mixins";
-import { colors, iconSize, motion, radius } from "@/theme/tokens.stylex";
 
 function toggleTheme() {
   const root = document.documentElement;
@@ -18,7 +17,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggleTheme}
       aria-label="Toggle theme"
-      {...stylex.props(mixins.focusRing, styles.toggle)}
+      sx={[mixins.focusRing, styles.toggle]}
     >
       <Sun aria-hidden {...stylex.props(styles.icon, styles.sun)} />
       <Moon aria-hidden {...stylex.props(styles.icon, styles.moon)} />
@@ -34,16 +33,16 @@ const styles = stylex.create({
     height: 40,
     borderWidth: 1,
     borderStyle: "solid",
-    borderColor: colors.border,
-    borderRadius: radius.full,
-    backgroundColor: { default: "transparent", ":hover": colors.surfaceHover },
-    color: colors.textPrimary,
+    borderColor: theme.colors.border,
+    borderRadius: theme.sizes.radius.full,
+    backgroundColor: { default: "transparent", ":hover": theme.colors.surfaceHover },
+    color: theme.colors.textPrimary,
     cursor: "pointer",
     transitionProperty: "background-color",
-    transitionDuration: motion.durationFast,
-    transitionTimingFunction: motion.easingStandard,
+    transitionDuration: theme.motion.durationFast,
+    transitionTimingFunction: theme.motion.easingStandard,
   },
-  icon: { width: iconSize.medium, height: iconSize.medium },
+  icon: { width: theme.sizes.icon.medium, height: theme.sizes.icon.medium },
   sun: { display: { default: "block", [stylex.when.ancestor('[data-theme="light"]')]: "none" } },
   moon: { display: { default: "none", [stylex.when.ancestor('[data-theme="light"]')]: "block" } },
 });

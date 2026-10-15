@@ -135,11 +135,11 @@ const Base = styled.button`
 ```tsx
 const variants = stylex.create({
   primary: {
-    backgroundColor: { default: colors.accent, ":hover": colors.accentHover },
-    color: colors.textOnAccent,
+    backgroundColor: { default: theme.colors.accent, ":hover": theme.colors.accentHover },
+    color: theme.colors.textOnAccent,
   },
 });
-// {...stylex.props(mixins.focusRing, styles.base, variants[variant], sizes[size])}
+// <button sx={[mixins.focusRing, styles.base, variants[variant], sizes[size]]}>
 ```
 
 **Panda.** A config recipe produces a typed `button()` function:
@@ -188,7 +188,7 @@ const Footer = styled.div`
 `;
 
 // StyleX
-card: { containerType: "inline-size", padding: { default: spacing[6], [media.md]: spacing[8] } },
+card: { containerType: "inline-size", padding: { default: theme.sizes.spacing[6], [media.md]: theme.sizes.spacing[8] } },
 footer: { flexDirection: { default: "column-reverse", [container.cardWide]: "row" } },
 
 // Panda
@@ -200,7 +200,7 @@ footer: css({ flexDirection: { base: "column-reverse", "@/cardWide": "row" } }),
 
 Each app has a `/showcase` route (`src/showcase/TripCard.tsx`) with one thing that library does better than the others. The visual-parity check and the benchmarks only look at `/`, so these pages don't affect them.
 
-**StyleX: typed style contracts.** `TripCard` accepts `style?: StyleXStyles<{ marginBlock?, inlineSize?, maxInlineSize? }>`. Passing a style that sets `color` fails `tsc` (TS2322), and the file keeps that case as a `@ts-expect-error` line so the typecheck proves it. This is the "AI-safe design system" argument. A component decides which properties callers may touch, and the compiler enforces it. It only covers what goes through the `style` prop. Nothing stops a caller from wrapping the component in another element and styling that.
+**StyleX: typed style contracts.** `TripCard` accepts `sx?: StyleXStyles<{ marginBlock?, inlineSize?, maxInlineSize? }>`. Passing an `sx` that sets `color` fails `tsc` (TS2322), and the file keeps that case as a `@ts-expect-error` line so the typecheck proves it. This is the "AI-safe design system" argument. A component decides which properties callers may touch, and the compiler enforces it. It only covers what goes through the `sx` prop. Nothing stops a caller from wrapping the component in another element and styling that.
 
 **next-yak: styled-components ergonomics at zero runtime.** `${Wrapper}:hover ${Title}` targets components imported from another file, and `$progress` drives a progress bar width. yak compiles the prop to an inline CSS variable, `style="--yaLdB8v3:25%"`, behind a static rule. The browser never generates styles.
 
@@ -304,6 +304,8 @@ Measured 2026-10-14 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 - Theming uses StyleX's `light-dark()` recipe rather than `--` named variables with attribute overrides. This deviates from the plan, but it's simpler and documented upstream.
 - Overlapping `min-width` constants resolved in the right order (the heading is 56px at 1280px), but StyleX doesn't document that as guaranteed when using `defineConsts`.
 - Biome reports `@stylex;` as an unknown at-rule, so it has to be allow-listed.
+- Markup uses the `sx` prop (`<p sx={styles.eyebrow}>`, `sx={[a, b]}`) instead of `{...stylex.props(…)}`. The Babel plugin rewrites it to the same call, so the HTML is identical. It only applies to lowercase elements: components such as lucide icons still need the spread, and `Card`/`TripCard` take `sx` as an ordinary prop that they pass on. TypeScript doesn't know `sx`, so `src/sx.d.ts` adds `sx?: StyleXStyles` to React's `HTMLAttributes`.
+- Components get `stylex` and the tokens from one import: `import { container, media, stylex, theme } from "@/theme/index.stylex"`. Tokens are one `unstable_defineVarsNested` object (`theme.colors.accent`, `theme.sizes.spacing[6]`). Breakpoints stay separate `defineConsts` exports, because a media query has to be a constant and one object can't mix constants with variables. The compiler only resolves named imports from paths ending in `.stylex`, so `from "@/theme"`, `import * as theme` and a plain object that bundles several `defineVars` all fail. Re-exporting `stylex` needs `importSources: ["@stylexjs/stylex", { from: "@/theme/index.stylex", as: "stylex" }]` in `babel.config.js`, and the plugin matches that string literally, so relative imports of the file aren't recognized.
 
 **Panda**
 - v2 adds no presets automatically. This app uses only `@pandacss/preset-base`, so there are no default tokens.

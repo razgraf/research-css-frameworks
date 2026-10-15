@@ -1,8 +1,7 @@
-import * as stylex from "@stylexjs/stylex";
 import type { LucideIcon } from "lucide-react";
 import type { ComponentProps } from "react";
+import { stylex, theme } from "@/theme/index.stylex";
 import { mixins } from "@/theme/mixins";
-import { colors, font, iconSize, motion, radius, spacing } from "@/theme/tokens.stylex";
 
 type Variant = "primary" | "secondary";
 type Size = "medium" | "large";
@@ -24,7 +23,7 @@ export function Button({
     <button
       type="button"
       {...props}
-      {...stylex.props(mixins.focusRing, styles.base, variants[variant], sizes[size])}
+      sx={[mixins.focusRing, styles.base, variants[variant], sizes[size]]}
     >
       {Icon && <Icon aria-hidden {...stylex.props(icons[size])} />}
       {children}
@@ -37,47 +36,47 @@ const styles = stylex.create({
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: spacing[2],
+    gap: theme.sizes.spacing[2],
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: "transparent",
-    borderRadius: radius.medium,
-    fontWeight: font.weightMedium,
+    borderRadius: theme.sizes.radius.medium,
+    fontWeight: theme.font.weightMedium,
     cursor: "pointer",
     transitionProperty: "background-color",
-    transitionDuration: motion.durationFast,
-    transitionTimingFunction: motion.easingStandard,
+    transitionDuration: theme.motion.durationFast,
+    transitionTimingFunction: theme.motion.easingStandard,
   },
 });
 
 const variants = stylex.create({
   primary: {
-    backgroundColor: { default: colors.accent, ":hover": colors.accentHover },
-    color: colors.textOnAccent,
+    backgroundColor: { default: theme.colors.accent, ":hover": theme.colors.accentHover },
+    color: theme.colors.textOnAccent,
   },
   secondary: {
-    backgroundColor: { default: "transparent", ":hover": colors.surfaceHover },
-    borderColor: colors.border,
-    color: colors.textPrimary,
+    backgroundColor: { default: "transparent", ":hover": theme.colors.surfaceHover },
+    borderColor: theme.colors.border,
+    color: theme.colors.textPrimary,
   },
 });
 
 const sizes = stylex.create({
   medium: {
     minHeight: 40,
-    paddingBlock: spacing[2],
-    paddingInline: spacing[4],
-    fontSize: font.sizeSmall,
+    paddingBlock: theme.sizes.spacing[2],
+    paddingInline: theme.sizes.spacing[4],
+    fontSize: theme.font.sizeSmall,
   },
   large: {
     minHeight: 48,
-    paddingBlock: spacing[3],
-    paddingInline: spacing[6],
-    fontSize: font.sizeBody,
+    paddingBlock: theme.sizes.spacing[3],
+    paddingInline: theme.sizes.spacing[6],
+    fontSize: theme.font.sizeBody,
   },
 });
 
 const icons = stylex.create({
-  medium: { width: iconSize.small, height: iconSize.small },
-  large: { width: iconSize.medium, height: iconSize.medium },
+  medium: { width: theme.sizes.icon.small, height: theme.sizes.icon.small },
+  large: { width: theme.sizes.icon.medium, height: theme.sizes.icon.medium },
 });

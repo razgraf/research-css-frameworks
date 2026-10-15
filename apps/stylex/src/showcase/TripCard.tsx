@@ -1,6 +1,6 @@
 // Showcase: typed style contracts. TripCard accepts StyleX overrides for layout only, so callers
-// (people or agents) can't restyle its colors or spacing. Passing a style that sets `color` is a
-// type error, and allowed overrides win deterministically because the caller's style merges last.
+// (people or agents) can't restyle its colors or spacing. Passing an `sx` that sets `color` is a
+// type error, and allowed overrides win deterministically because the caller's `sx` merges last.
 import type { StyleXStyles } from "@stylexjs/stylex";
 import { Rocket } from "lucide-react";
 import { Button } from "@/components/Button";
@@ -13,10 +13,10 @@ export type TripCardStyle = StyleXStyles<{
   maxInlineSize?: string | number;
 }>;
 
-export function TripCard({ style }: { style?: TripCardStyle }) {
+export function TripCard({ sx }: { sx?: TripCardStyle }) {
   return (
     <Card
-      style={style}
+      sx={sx}
       title={content.card.title}
       items={content.card.items}
       footer={

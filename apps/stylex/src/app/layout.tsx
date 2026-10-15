@@ -1,8 +1,7 @@
-import * as stylex from "@stylexjs/stylex";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
-import { colors, font } from "@/theme/tokens.stylex";
+import { stylex, theme } from "@/theme/index.stylex";
 import "./globals.css";
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
@@ -28,7 +27,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static inline script prevents a theme flash */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body {...stylex.props(styles.body)}>{children}</body>
+      <body sx={styles.body}>{children}</body>
     </html>
   );
 }
@@ -36,10 +35,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 const styles = stylex.create({
   body: {
     margin: 0,
-    backgroundColor: colors.background,
-    color: colors.textPrimary,
-    fontFamily: font.familySans,
-    fontSize: font.sizeBody,
+    backgroundColor: theme.colors.background,
+    color: theme.colors.textPrimary,
+    fontFamily: theme.font.familySans,
+    fontSize: theme.font.sizeBody,
     lineHeight: 1.5,
     WebkitFontSmoothing: "antialiased",
   },
