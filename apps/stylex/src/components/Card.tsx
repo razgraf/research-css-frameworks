@@ -1,33 +1,31 @@
-import * as stylex from "@stylexjs/stylex";
 import { MapPin } from "lucide-react";
 import type { ReactNode } from "react";
-import { container, media } from "@/theme/breakpoints.stylex";
+import { container, media, stylex, theme } from "@/theme/index.stylex";
 import { mixins } from "@/theme/mixins";
-import { colors, font, iconSize, motion, spacing } from "@/theme/tokens.stylex";
 
 type Props = {
   title: string;
   items: { title: string; text: string }[];
   footer?: ReactNode;
-  style?: stylex.StyleXStyles;
+  sx?: stylex.StyleXStyles;
 };
 
-export function Card({ title, items, footer, style }: Props) {
+export function Card({ title, items, footer, sx }: Props) {
   return (
-    <article {...stylex.props(mixins.surface, styles.card, style)}>
-      <h2 {...stylex.props(styles.title)}>{title}</h2>
-      <ul {...stylex.props(styles.list)}>
+    <article sx={[mixins.surface, styles.card, sx]}>
+      <h2 sx={styles.title}>{title}</h2>
+      <ul sx={styles.list}>
         {items.map((item) => (
-          <li key={item.title} {...stylex.props(styles.item)}>
+          <li key={item.title} sx={styles.item}>
             <MapPin aria-hidden {...stylex.props(styles.icon)} />
             <div>
-              <span {...stylex.props(styles.itemTitle)}>{item.title}</span>
-              <p {...stylex.props(styles.itemText)}>{item.text}</p>
+              <span sx={styles.itemTitle}>{item.title}</span>
+              <p sx={styles.itemText}>{item.text}</p>
             </div>
           </li>
         ))}
       </ul>
-      {footer && <div {...stylex.props(styles.footer)}>{footer}</div>}
+      {footer && <div sx={styles.footer}>{footer}</div>}
     </article>
   );
 }
@@ -35,21 +33,21 @@ export function Card({ title, items, footer, style }: Props) {
 const styles = stylex.create({
   card: {
     containerType: "inline-size",
-    padding: { default: spacing[6], [media.md]: spacing[8] },
-    borderColor: { default: colors.border, ":hover": colors.accent },
+    padding: { default: theme.sizes.spacing[6], [media.md]: theme.sizes.spacing[8] },
+    borderColor: { default: theme.colors.border, ":hover": theme.colors.accent },
     transitionProperty: "border-color",
-    transitionDuration: motion.durationFast,
-    transitionTimingFunction: motion.easingStandard,
+    transitionDuration: theme.motion.durationFast,
+    transitionTimingFunction: theme.motion.easingStandard,
   },
   title: {
     margin: 0,
-    marginBottom: spacing[6],
-    fontSize: font.sizeLarge,
-    fontWeight: font.weightBold,
+    marginBottom: theme.sizes.spacing[6],
+    fontSize: theme.font.sizeLarge,
+    fontWeight: theme.font.weightBold,
   },
   list: {
     display: "grid",
-    gap: spacing[4],
+    gap: theme.sizes.spacing[4],
     gridTemplateColumns: { default: null, [media.md]: "repeat(2, 1fr)" },
     margin: 0,
     padding: 0,
@@ -58,26 +56,26 @@ const styles = stylex.create({
   item: {
     display: "grid",
     gridTemplateColumns: "auto 1fr",
-    gap: spacing[3],
+    gap: theme.sizes.spacing[3],
   },
   icon: {
-    width: iconSize.medium,
-    height: iconSize.medium,
-    color: colors.accent,
+    width: theme.sizes.icon.medium,
+    height: theme.sizes.icon.medium,
+    color: theme.colors.accent,
   },
-  itemTitle: { fontWeight: font.weightMedium },
+  itemTitle: { fontWeight: theme.font.weightMedium },
   itemText: {
     margin: 0,
-    marginTop: spacing[1],
-    color: colors.textSecondary,
-    fontSize: font.sizeSmall,
+    marginTop: theme.sizes.spacing[1],
+    color: theme.colors.textSecondary,
+    fontSize: theme.font.sizeSmall,
     lineHeight: 1.5,
   },
   footer: {
     display: "flex",
     flexDirection: { default: "column-reverse", [container.cardWide]: "row" },
     justifyContent: { default: null, [container.cardWide]: "flex-end" },
-    gap: spacing[3],
-    marginTop: spacing[8],
+    gap: theme.sizes.spacing[3],
+    marginTop: theme.sizes.spacing[8],
   },
 });

@@ -135,11 +135,11 @@ const Base = styled.button`
 ```tsx
 const variants = stylex.create({
   primary: {
-    backgroundColor: { default: colors.accent, ":hover": colors.accentHover },
-    color: colors.textOnAccent,
+    backgroundColor: { default: theme.colors.accent, ":hover": theme.colors.accentHover },
+    color: theme.colors.textOnAccent,
   },
 });
-// {...stylex.props(mixins.focusRing, styles.base, variants[variant], sizes[size])}
+// <button sx={[mixins.focusRing, styles.base, variants[variant], sizes[size]]}>
 ```
 
 **Panda.** A config recipe produces a typed `button()` function:
@@ -188,7 +188,7 @@ const Footer = styled.div`
 `;
 
 // StyleX
-card: { containerType: "inline-size", padding: { default: spacing[6], [media.md]: spacing[8] } },
+card: { containerType: "inline-size", padding: { default: theme.sizes.spacing[6], [media.md]: theme.sizes.spacing[8] } },
 footer: { flexDirection: { default: "column-reverse", [container.cardWide]: "row" } },
 
 // Panda
@@ -200,7 +200,7 @@ footer: css({ flexDirection: { base: "column-reverse", "@/cardWide": "row" } }),
 
 Each app has a `/showcase` route (`src/showcase/TripCard.tsx`) with one thing that library does better than the others. The visual-parity check and the benchmarks only look at `/`, so these pages don't affect them.
 
-**StyleX: typed style contracts.** `TripCard` accepts `style?: StyleXStyles<{ marginBlock?, inlineSize?, maxInlineSize? }>`. Passing a style that sets `color` fails `tsc` (TS2322), and the file keeps that case as a `@ts-expect-error` line so the typecheck proves it. This is the "AI-safe design system" argument. A component decides which properties callers may touch, and the compiler enforces it. It only covers what goes through the `style` prop. Nothing stops a caller from wrapping the component in another element and styling that.
+**StyleX: typed style contracts.** `TripCard` accepts `sx?: StyleXStyles<{ marginBlock?, inlineSize?, maxInlineSize? }>`. Passing an `sx` that sets `color` fails `tsc` (TS2322), and the file keeps that case as a `@ts-expect-error` line so the typecheck proves it. This is the "AI-safe design system" argument. A component decides which properties callers may touch, and the compiler enforces it. It only covers what goes through the `sx` prop. Nothing stops a caller from wrapping the component in another element and styling that.
 
 **next-yak: styled-components ergonomics at zero runtime.** `${Wrapper}:hover ${Title}` targets components imported from another file, and `$progress` drives a progress bar width. yak compiles the prop to an inline CSS variable, `style="--yaLdB8v3:25%"`, behind a static rule. The browser never generates styles.
 
@@ -216,18 +216,18 @@ Each app has a `/showcase` route (`src/showcase/TripCard.tsx`) with one thing th
 
 <!-- bench:start -->
 
-Measured 2026-10-14 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.15.0, bun 1.3.13, Chromium 156.0.8078.4. Values are median (p95) of 10 runs. Raw data: `bench/results/`.
+Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.15.0, bun 1.3.13, Chromium 156.0.8078.4. Values are median (p95) of 10 runs. Raw data: `bench/results/`.
 
 ### Build time (seconds, `bun run build`)
 
 | App | Cold (no `.next`) | Warm (cached) | Peak RSS, cold (MB, largest process) |
 | --- | --- | --- | --- |
-| css-modules | 3.19 (3.52) | 1.83 (2.05) | 810 (829) |
-| tailwind | 3.13 (3.57) | 1.69 (1.88) | 808 (838) |
-| next-yak | 3.49 (3.81) | 1.67 (1.72) | 858 (874) |
-| linaria | 4.34 (4.52) | 2.13 (2.31) | 876 (901) |
-| stylex | 4.65 (4.88) | 1.72 (1.79) | 847 (869) |
-| panda | 3.40 (3.70) | 1.81 (1.95) | 812 (831) |
+| css-modules | 3.23 (3.71) | 1.79 (1.88) | 821 (846) |
+| tailwind | 3.07 (3.22) | 1.65 (1.69) | 809 (823) |
+| next-yak | 3.68 (3.91) | 1.66 (1.88) | 874 (905) |
+| linaria | 4.22 (4.64) | 2.14 (2.24) | 869 (903) |
+| stylex | 4.59 (4.98) | 1.67 (1.71) | 838 (859) |
+| panda | 3.13 (3.41) | 1.79 (1.88) | 822 (841) |
 
 ### First-load bytes for `/` (brotli)
 
@@ -237,19 +237,19 @@ Measured 2026-10-14 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 | tailwind | 3.7 KB | 148.6 KB | +0.0 KB | 3.7 KB |
 | next-yak | 2.3 KB | 149.3 KB | +0.8 KB | 3.4 KB |
 | linaria | 2.2 KB | 150.8 KB | +2.2 KB | 3.4 KB |
-| stylex | 2.6 KB | 149.3 KB | +0.8 KB | 3.9 KB |
+| stylex | 2.6 KB | 149.4 KB | +0.8 KB | 3.9 KB |
 | panda | 2.8 KB | 153.8 KB | +5.2 KB | 3.8 KB |
 
 ### Browser cost for `/` (ms, Chromium, 4× CPU throttle)
 
 | App | Parse stylesheets | Recalculate style | Layout | FCP | LCP | Theme toggle recalc |
 | --- | --- | --- | --- | --- | --- | --- |
-| css-modules | 0.5 (1.2) | 3.7 (6.7) | 22.7 (24.6) | 66.0 (68.0) | 66.0 (68.0) | 3.2 (4.5) |
-| tailwind | 1.0 (1.3) | 4.2 (5.4) | 25.0 (27.4) | 72.0 (76.0) | 72.0 (76.0) | 4.9 (5.9) |
-| next-yak | 0.7 (0.9) | 3.4 (4.4) | 23.9 (26.5) | 68.0 (72.0) | 68.0 (72.0) | 2.6 (3.8) |
-| linaria | 0.5 (0.9) | 3.2 (4.2) | 24.0 (26.1) | 68.0 (72.0) | 68.0 (72.0) | 2.7 (3.5) |
-| stylex | 0.7 (1.0) | 3.5 (3.8) | 22.7 (24.5) | 64.0 (72.0) | 64.0 (72.0) | 3.2 (4.3) |
-| panda | 0.8 (1.2) | 4.3 (5.8) | 27.9 (33.8) | 80.0 (104.0) | 80.0 (104.0) | 4.2 (5.3) |
+| css-modules | 0.6 (1.3) | 3.6 (4.8) | 21.0 (28.3) | 60.0 (72.0) | 60.0 (72.0) | 2.7 (4.0) |
+| tailwind | 0.8 (1.4) | 4.0 (5.0) | 21.3 (23.0) | 64.0 (68.0) | 64.0 (68.0) | 5.0 (6.4) |
+| next-yak | 0.5 (0.8) | 3.2 (4.0) | 22.4 (30.0) | 64.0 (76.0) | 64.0 (76.0) | 3.4 (4.8) |
+| linaria | 0.4 (0.9) | 3.3 (4.7) | 22.7 (28.5) | 64.0 (76.0) | 64.0 (76.0) | 2.8 (3.7) |
+| stylex | 0.6 (0.9) | 3.4 (4.3) | 22.6 (27.9) | 64.0 (72.0) | 64.0 (72.0) | 2.7 (3.8) |
+| panda | 0.8 (1.1) | 4.0 (4.5) | 23.8 (26.9) | 66.0 (76.0) | 66.0 (76.0) | 3.2 (3.8) |
 
 <!-- bench:end -->
 
@@ -257,8 +257,8 @@ Measured 2026-10-14 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 
 - **Bundle size barely separates them.** CSS is 2 to 4 KB everywhere, and roughly 149 KB of JS is the Next/React baseline. The JS deltas come from the one client component (`ThemeToggle`), which pulls in each library's runtime helper: `stylex.props` and yak (+0.8 KB), Linaria's `styled` (+2.2 KB), and Panda's `css()` and `cx` (+5.2 KB, because Panda computes class names at runtime). Server components ship no styling JS in any app. The more client components you style, the more these deltas matter.
 - **Tailwind ships the most CSS**, 3.7 KB against 2.2 to 2.8 KB for the rest. That's preflight plus one utility per value used.
-- **The browser can't tell them apart.** Parse, style recalculation, layout, FCP and LCP all fall within noise. Between two full benchmark runs, the same app's FCP median moved by up to 8 ms (Panda went from 72 to 80 ms), which is more than the gap between any two apps. The one repeat outlier is Tailwind's theme-toggle recalculation, 4.9 to 5.7 ms against about 3 ms elsewhere in both runs, likely from the `:where([data-theme=light] *)` variant on the icons. That's real but tiny.
-- **Build time is the only meaningful difference.** Tailwind, CSS Modules, Panda and next-yak finish cold builds within 0.4 s of each other. Linaria costs about 1.2 s more (it executes style code in Node), and StyleX about 1.5 s more (Babel over every file). With a warm cache, all six build in 1.7 to 2.1 s.
+- **The browser can't tell them apart.** Parse, style recalculation, layout, FCP and LCP all fall within noise. Between two full benchmark runs, the same app's FCP median moved by up to 14 ms (Panda measured 72, 80 and 66 ms across three runs), which is more than the gap between any two apps. The one repeat outlier is Tailwind's theme-toggle recalculation, 4.9 to 5.7 ms against about 3 ms elsewhere in every run, likely from the `:where([data-theme=light] *)` variant on the icons. That's real but tiny.
+- **Build time is the only meaningful difference.** Tailwind, CSS Modules, Panda and next-yak finish cold builds within 0.6 s of each other. Linaria costs about 1.1 s more (it executes style code in Node), and StyleX about 1.5 s more (Babel over every file). With a warm cache, all six build in 1.7 to 2.1 s.
 
 ## Problems hit during setup
 
@@ -304,6 +304,8 @@ Measured 2026-10-14 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 - Theming uses StyleX's `light-dark()` recipe rather than `--` named variables with attribute overrides. This deviates from the plan, but it's simpler and documented upstream.
 - Overlapping `min-width` constants resolved in the right order (the heading is 56px at 1280px), but StyleX doesn't document that as guaranteed when using `defineConsts`.
 - Biome reports `@stylex;` as an unknown at-rule, so it has to be allow-listed.
+- Markup uses the `sx` prop (`<p sx={styles.eyebrow}>`, `sx={[a, b]}`) instead of `{...stylex.props(…)}`. The Babel plugin rewrites it to the same call, so the HTML is identical. It only applies to lowercase elements: components such as lucide icons still need the spread, and `Card`/`TripCard` take `sx` as an ordinary prop that they pass on. TypeScript doesn't know `sx`, so `src/sx.d.ts` adds `sx?: StyleXStyles` to React's `HTMLAttributes`.
+- Components get `stylex` and the tokens from one import: `import { container, media, stylex, theme } from "@/theme/index.stylex"`. Tokens are one `unstable_defineVarsNested` object (`theme.colors.accent`, `theme.sizes.spacing[6]`). Breakpoints stay separate `defineConsts` exports, because a media query has to be a constant and one object can't mix constants with variables. The compiler only resolves named imports from paths ending in `.stylex`, so `from "@/theme"`, `import * as theme` and a plain object that bundles several `defineVars` all fail. Re-exporting `stylex` needs `importSources: ["@stylexjs/stylex", { from: "@/theme/index.stylex", as: "stylex" }]` in `babel.config.js`, and the plugin matches that string literally, so relative imports of the file aren't recognized.
 
 **Panda**
 - v2 adds no presets automatically. This app uses only `@pandacss/preset-base`, so there are no default tokens.
@@ -328,7 +330,7 @@ Measured 2026-10-14 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 Where the others fit:
 
 - **CSS Modules** if you'd rather depend on nothing. It's native CSS with nesting, `@custom-media`, `@scope` and `:has()`, with no lock-in. Typed class names cost a codegen step, and container queries can't use tokens. It's also the fallback if next-yak stalls, since yak compiles to `.yak.module.css` files anyway.
-- **Linaria** gives the same authoring as yak plus real JS evaluation at build time. You give up conditional variant blocks (data attributes instead), mixins become untyped strings, and cold builds take about 1.2 s longer. Choose it over yak only if computed styles matter.
+- **Linaria** gives the same authoring as yak plus real JS evaluation at build time. You give up conditional variant blocks (data attributes instead), mixins become untyped strings, and cold builds take about 1.1 s longer. Choose it over yak only if computed styles matter.
 - **StyleX** if the compiler must enforce the design system. It has typed style contracts, deterministic merging and the strongest guardrails for agents. You give up template literals, descendant selectors (component APIs change to fit) and about 1.5 s per cold build, the most of the six.
 - **Panda** for typed tokens and recipes with `strictTokens`. It's object syntax again (template literals are gone in v2), with a codegen step, and it ships the most client JS of the six.
 - **Tailwind** doesn't fit the stated preferences, and nothing here contradicts the class-soup notes. Variants need `cva`, merges need `tailwind-merge` configured with duplicated token names, and media queries live on every element.

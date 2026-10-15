@@ -7,6 +7,7 @@ module.exports = {
       "@stylexjs/babel-plugin",
       {
         dev: process.env.NODE_ENV !== "production",
+        importSources: ["@stylexjs/stylex", { from: "@/theme/index.stylex", as: "stylex" }],
         runtimeInjection: false,
         enableInlinedConditionalMerge: true,
         treeshakeCompensation: true,

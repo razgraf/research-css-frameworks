@@ -3,31 +3,31 @@
   "unit": "bytes",
   "firstLoad": {
     "html": {
-      "raw": 18645,
-      "gzip": 4626,
-      "brotli": 4037
+      "raw": 18665,
+      "gzip": 4620,
+      "brotli": 4017
     },
     "css": {
-      "raw": 9191,
-      "gzip": 2975,
-      "brotli": 2706
+      "raw": 9113,
+      "gzip": 2925,
+      "brotli": 2679
     },
     "js": {
-      "raw": 574425,
-      "gzip": 177168,
-      "brotli": 152926
+      "raw": 574487,
+      "gzip": 177187,
+      "brotli": 152952
     }
   },
   "total": {
     "css": {
-      "raw": 9191,
-      "gzip": 2975,
-      "brotli": 2706
+      "raw": 9113,
+      "gzip": 2925,
+      "brotli": 2679
     },
     "js": {
-      "raw": 576936,
-      "gzip": 178374,
-      "brotli": 154017
+      "raw": 576998,
+      "gzip": 178393,
+      "brotli": 154043
     }
   }
 }
