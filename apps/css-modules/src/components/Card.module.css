@@ -2,8 +2,8 @@
 
 .card {
   composes: surface from "@/theme/mixins.module.css";
-  container-type: inline-size;
   padding: var(--spacing-6);
+  container-type: inline-size;
   transition: border-color var(--duration-fast) var(--easing-standard);
 
   &:hover {
@@ -24,8 +24,8 @@
 .list {
   display: grid;
   gap: var(--spacing-4);
-  margin: 0;
   padding: 0;
+  margin: 0;
   list-style: none;
 
   @media (--md) {
@@ -51,9 +51,9 @@
 
 .itemText {
   margin: var(--spacing-1) 0 0;
-  color: var(--color-text-secondary);
   font-size: var(--font-size-small);
   line-height: 1.5;
+  color: var(--color-text-secondary);
 }
 
 .footer {

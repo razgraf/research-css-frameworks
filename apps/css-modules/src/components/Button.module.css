@@ -5,18 +5,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-2);
-  border: 1px solid transparent;
-  border-radius: var(--radius-medium);
   font-family: inherit;
   font-weight: var(--font-weight-medium);
   cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: var(--radius-medium);
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
 .primary {
-  background: var(--color-accent);
+  font-size: large;
+  font-weight: 500;
   color: var(--color-text-on-accent);
+  background: var(--color-accent);
 
   &:hover {
     background: var(--color-accent-hover);
@@ -24,9 +25,9 @@
 }
 
 .secondary {
+  color: var(--color-text-primary);
   background: transparent;
   border-color: var(--color-border);
-  color: var(--color-text-primary);
 
   &:hover {
     background: var(--color-surface-hover);

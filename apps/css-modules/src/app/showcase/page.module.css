@@ -4,8 +4,8 @@
   display: grid;
   gap: var(--spacing-12);
   max-width: 1152px;
-  margin-inline: auto;
   padding: var(--spacing-12) var(--spacing-6);
+  margin-inline: auto;
 
   @media (--lg) {
     grid-template-columns: 1fr 1fr;

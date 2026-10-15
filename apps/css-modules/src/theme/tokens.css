@@ -46,8 +46,6 @@
   --easing-standard: cubic-bezier(0.2, 0, 0, 1);
   --icon-size-small: 16px;
   --icon-size-medium: 20px;
-
-  color-scheme: dark;
   --color-background: var(--neutral-950);
   --color-surface: var(--neutral-900);
   --color-surface-hover: var(--neutral-800);
@@ -59,10 +57,11 @@
   --color-text-on-accent: var(--neutral-950);
   --color-focus-ring: var(--mars-300);
   --shadow-card: 0 8px 24px rgb(0 0 0 / 0.4);
+
+  color-scheme: dark;
 }
 
 :root[data-theme="light"] {
-  color-scheme: light;
   --color-background: var(--neutral-50);
   --color-surface: var(--white);
   --color-surface-hover: var(--neutral-100);
@@ -74,4 +73,5 @@
   --color-text-on-accent: var(--white);
   --color-focus-ring: var(--mars-600);
   --shadow-card: 0 8px 24px rgb(16 18 24 / 0.08);
+  color-scheme: light;
 }
