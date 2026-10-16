@@ -6,7 +6,7 @@ type Stat = { median: number; p95: number };
 type Bytes = { raw: number; gzip: number; brotli: number };
 type Env = Record<string, string | number>;
 type BuildRun = { ms: Stat; peakMemoryMb: Stat };
-type Build = { cold: BuildRun; warm: BuildRun };
+type Build = { date?: string; cold: BuildRun; warm: BuildRun };
 type Size = { firstLoad: { html: Bytes; css: Bytes; js: Bytes } };
 type Trace = Record<
   "parseStylesheet" | "recalcStyle" | "layout" | "fcp" | "lcp" | "toggleRecalcStyle",
@@ -25,9 +25,13 @@ const builds = apps.map((app) => readResult<Build>(`build-${app}`));
 const sizes = apps.map((app) => readResult<Size>(`size-${app}`));
 const traces = apps.map((app) => readResult<Trace>(`trace-${app}`));
 const baselineJs = sizes[0].firstLoad.js.brotli;
+const note = apps
+  .filter((_, i) => builds[i].date && builds[i].date !== env.date)
+  .map((app) => ` \`${app}\` was measured ${builds[apps.indexOf(app)].date} in a separate run.`)
+  .join("");
 
 const section = [
-  `Measured ${env.date} on ${env.cpu} (${env.cores} cores, ${env.memoryGb} GB), ${env.os}, Node ${env.node}, bun ${env.bun}, Chromium ${env.chromium}. Values are median (p95) of 10 runs. Raw data: \`bench/results/\`.`,
+  `Measured ${env.date} on ${env.cpu} (${env.cores} cores, ${env.memoryGb} GB), ${env.os}, Node ${env.node}, bun ${env.bun}, Chromium ${env.chromium}. Values are median (p95) of 10 runs. Raw data: \`bench/results/\`.${note}`,
   "### Build time (seconds, `bun run build`)",
   table(
     ["App", "Cold (no `.next`)", "Warm (cached)", "Peak RSS, cold (MB, largest process)"],

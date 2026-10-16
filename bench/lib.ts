@@ -5,7 +5,15 @@ import path from "node:path";
 
 export const root = path.resolve(import.meta.dirname, "..");
 export const resultsDir = path.join(import.meta.dirname, "results");
-export const apps = ["css-modules", "tailwind", "next-yak", "linaria", "stylex", "panda"] as const;
+export const apps = [
+  "css-modules",
+  "tailwind",
+  "next-yak",
+  "linaria",
+  "stylex",
+  "panda",
+  "vanilla-extract",
+] as const;
 export type App = (typeof apps)[number];
 export const runs = 10;
 

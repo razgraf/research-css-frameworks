@@ -1,6 +1,6 @@
 # CSS frameworks comparison
 
-The same Next.js landing page ("Visit Mars") built six times, once per styling approach, to decide what replaces styled-components. Every app has the same tokens, components, light/dark theme, breakpoints and container query. The only differences are how each library expresses them.
+The same Next.js landing page ("Visit Mars") built seven times, once per styling approach, to decide what replaces styled-components. Every app has the same tokens, components, light/dark theme, breakpoints and container query. The only differences are how each library expresses them.
 
 | App | Library | Authoring style |
 | --- | --- | --- |
@@ -10,6 +10,7 @@ The same Next.js landing page ("Visit Mars") built six times, once per styling a
 | [`apps/linaria`](apps/linaria) | Linaria 8.2 via `@wyw-in-js/nextjs` | `styled` template literals (build-time eval) |
 | [`apps/stylex`](apps/stylex) | StyleX 0.19 | `stylex.create` objects |
 | [`apps/panda`](apps/panda) | Panda CSS 2.2 | `css()` objects + recipes |
+| [`apps/vanilla-extract`](apps/vanilla-extract) | vanilla-extract 1.21 | `style()` objects in `.css.ts` files + recipes |
 
 Each app is standalone, with its own lockfile and configs, and nothing is shared between them. `PLAN.md` has the full spec and `PRD.md` the original brief.
 
@@ -46,27 +47,27 @@ bun run bench      # writes bench/results/*.json and the tables below
 - **Responsive layout.** Breakpoints are `sm` 640, `md` 768 and `lg` 1024. The hero goes from stacked to two columns at `lg`, the heading grows at `md` and `lg`, and the card list goes to two columns at `md`. The card's footer uses a **container query** (≥ 400px of card content) to switch from stacked buttons to a row.
 - **Server components.** Everything is a server component except `ThemeToggle`.
 
-All six apps render the same page pixel for pixel. Screenshots at 375, 768 and 1280px in both themes showed 0 differing pixels against the CSS Modules app.
+The first six apps render the same page pixel for pixel. Screenshots at 375, 768 and 1280px in both themes showed 0 differing pixels against the CSS Modules app. vanilla-extract was added later and compared by eye at the same sizes, with the heading measured at 56px at 1280px in both.
 
 ## Requirement matrix
 
 ✅ works well · ⚠️ works with a cost · ❌ not supported or works against the library
 
-| | CSS Modules | Tailwind | next-yak | Linaria | StyleX | Panda |
-| --- | --- | --- | --- | --- | --- | --- |
-| Design tokens | ⚠️ CSS variables, untyped in TS | ✅ `@theme` becomes utilities | ⚠️ CSS variables + typed TS refs, declared twice | ⚠️ same as yak | ✅ `defineVars`, typed | ✅ typed, `strictTokens` |
-| Light/dark | ✅ `[data-theme]` overrides | ✅ same variables overridden in `@layer base` | ✅ `globalStyle` | ✅ `:global()` | ✅ `light-dark()` + `color-scheme` | ✅ semantic tokens `base` / `_light` |
-| Reusable chunks | ✅ `composes` (whole classes only) | ⚠️ `@utility` in CSS, class strings in TS | ✅ `css` mixins interpolated | ⚠️ plain strings, no highlighting | ✅ shared `create` objects | ✅ `layerStyles` + spread objects |
-| Prop-driven variants | ✅ `styles[variant]` | ✅ `cva` | ✅ `${p => css…}`, same as styled-components | ⚠️ data attributes only | ✅ variant maps | ✅ config recipes, typed |
-| Media queries without literals | ✅ `@custom-media` (2 PostCSS plugins) | ✅ breakpoint tokens | ✅ TS constants | ✅ TS constants | ✅ `defineConsts` | ✅ breakpoint tokens (emitted as `rem`) |
-| Container queries without literals | ❌ literal `400px` | ✅ `@card-wide:` | ✅ TS constant | ✅ TS constant | ✅ `defineConsts` | ✅ `@/cardWide` |
-| Nesting + media queries inside the wrapper | ✅ native nesting | ❌ prefixes on every class | ✅ | ✅ | ❌ no descendant selectors | ⚠️ per-property conditions, `& svg` allowed |
-| Native CSS / template literals | ✅ plain CSS | ❌ | ✅ | ✅ | ❌ objects | ❌ objects (template literals removed in v2) |
-| Biome lint + format | ✅ CSS, CSS Modules, `@custom-media` | ✅ with `tailwindDirectives` | ⚠️ CSS inside `${}` templates isn't formatted | ⚠️ same as yak | ✅ (allow-list `@stylex`) | ✅ |
-| Editor autocomplete/highlighting | ✅ CSS language service + class names | ✅ Tailwind IntelliSense | ⚠️ styled-components extension (last update 2023) | ⚠️ same as yak | ✅ via TS types | ✅ via TS types (v2 extension unverified) |
-| Type-safety | ⚠️ none for class names: Next types every module as `{ [key: string]: string }` | ⚠️ only `cva` props are typed | ⚠️ token refs only | ⚠️ token refs only | ✅ typed style contracts | ✅ `strictTokens`, typed recipes |
-| Turbopack (`dev` + `build`) | ✅ | ✅ | ✅ | ✅ | ✅ (Babel runs on all app code) | ✅ |
-| Setup | PostCSS + 2 plugins | 1 PostCSS plugin | 1 config wrapper | 1 config wrapper | Babel + PostCSS config, layer ordering | config + codegen (~130 generated files) |
+| | CSS Modules | Tailwind | next-yak | Linaria | StyleX | Panda | vanilla-extract |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Design tokens | ⚠️ CSS variables, untyped in TS | ✅ `@theme` becomes utilities | ⚠️ CSS variables + typed TS refs, declared twice | ⚠️ same as yak | ✅ `defineVars`, typed | ✅ typed, `strictTokens` | ✅ `createGlobalThemeContract`, typed, stable names |
+| Light/dark | ✅ `[data-theme]` overrides | ✅ same variables overridden in `@layer base` | ✅ `globalStyle` | ✅ `:global()` | ✅ `light-dark()` + `color-scheme` | ✅ semantic tokens `base` / `_light` | ✅ `assignVars` under `[data-theme=light]` |
+| Reusable chunks | ✅ `composes` (whole classes only) | ⚠️ `@utility` in CSS, class strings in TS | ✅ `css` mixins interpolated | ⚠️ plain strings, no highlighting | ✅ shared `create` objects | ✅ `layerStyles` + spread objects | ✅ `style([surface, {…}])` |
+| Prop-driven variants | ✅ `styles[variant]` | ✅ `cva` | ✅ `${p => css…}`, same as styled-components | ⚠️ data attributes only | ✅ variant maps | ✅ config recipes, typed | ✅ `recipe()`, typed |
+| Media queries without literals | ✅ `@custom-media` (2 PostCSS plugins) | ✅ breakpoint tokens | ✅ TS constants | ✅ TS constants | ✅ `defineConsts` | ✅ breakpoint tokens (emitted as `rem`) | ✅ TS constants |
+| Container queries without literals | ❌ literal `400px` | ✅ `@card-wide:` | ✅ TS constant | ✅ TS constant | ✅ `defineConsts` | ✅ `@/cardWide` | ✅ `createContainer()` + TS constant |
+| Nesting + media queries inside the wrapper | ✅ native nesting | ❌ prefixes on every class | ✅ | ✅ | ❌ no descendant selectors | ⚠️ per-property conditions, `& svg` allowed | ⚠️ pseudo-classes and `@media` nest; children need a separate `globalStyle` rule |
+| Native CSS / template literals | ✅ plain CSS | ❌ | ✅ | ✅ | ❌ objects | ❌ objects (template literals removed in v2) | ❌ objects |
+| Biome lint + format | ✅ CSS, CSS Modules, `@custom-media` | ✅ with `tailwindDirectives` | ⚠️ CSS inside `${}` templates isn't formatted | ⚠️ same as yak | ✅ (allow-list `@stylex`) | ✅ | ✅ (`useSortedKeys` sorts alphabetically) |
+| Editor autocomplete/highlighting | ✅ CSS language service + class names | ✅ Tailwind IntelliSense | ⚠️ styled-components extension (last update 2023) | ⚠️ same as yak | ✅ via TS types | ✅ via TS types (v2 extension unverified) | ✅ via TS types |
+| Type-safety | ⚠️ none for class names: Next types every module as `{ [key: string]: string }` | ⚠️ only `cva` props are typed | ⚠️ token refs only | ⚠️ token refs only | ✅ typed style contracts | ✅ `strictTokens`, typed recipes | ✅ typed tokens, theme contracts, recipes; class names are exports |
+| Turbopack (`dev` + `build`) | ✅ | ✅ | ✅ | ✅ | ✅ (Babel runs on all app code) | ✅ | ⚠️ `unstable_turbopack` |
+| Setup | PostCSS + 2 plugins | 1 PostCSS plugin | 1 config wrapper | 1 config wrapper | Babel + PostCSS config, layer ordering | config + codegen (~130 generated files) | 1 config wrapper |
 
 ## Side by side
 
@@ -155,6 +156,27 @@ export const buttonRecipe = defineRecipe({
 });
 ```
 
+**vanilla-extract.** A `recipe()` in a `.css.ts` file. The base is its own `style()` so a `globalStyle` can size the icon through a variable each size sets:
+
+```ts
+const base = style([focusRing, { display: "inline-flex", borderRadius: vars.radius.medium }]);
+globalStyle(`${base} svg`, { height: iconSize, width: iconSize });
+
+export const button = recipe({
+  base,
+  variants: {
+    variant: {
+      primary: {
+        ":hover": { background: vars.color.accentHover },
+        background: vars.color.accent,
+      },
+    },
+    size: { medium: { fontSize: vars.fontSize.small, vars: { [iconSize]: vars.iconSize.small } } },
+  },
+});
+// <button className={button({ variant, size })} />
+```
+
 ### Card: media query and container query
 
 ```css
@@ -194,6 +216,18 @@ footer: { flexDirection: { default: "column-reverse", [container.cardWide]: "row
 // Panda
 card: css({ layerStyle: "surface", containerType: "inline-size", p: { base: "6", md: "8" } }),
 footer: css({ flexDirection: { base: "column-reverse", "@/cardWide": "row" } }),
+
+// vanilla-extract
+export const card = style([surface, {
+  "@media": { [media.md]: { padding: vars.spacing[8] } },
+  containerName: cardContainer,
+  containerType: "inline-size",
+  padding: vars.spacing[6],
+}]);
+export const footer = style({
+  "@container": { [container.cardWide]: { flexDirection: "row" } },
+  flexDirection: "column-reverse",
+});
 ```
 
 ## Showcases
@@ -212,11 +246,13 @@ Each app has a `/showcase` route (`src/showcase/TripCard.tsx`) with one thing th
 
 **Panda: typed multi-part recipes.** `TripCard` is an `sva` slot recipe in which one `tone: "featured"` variant restyles the root, title and icons together. Under `strictTokens`, `{ color: "#f00" }` fails `tsc`. The cost is that every one-off value needs the escape syntax (`"[40px]"`, `"[1.5]"`).
 
+**vanilla-extract: typed theme contracts.** `createTheme(vars.color, tokens)` returns a class that re-skins every semantic color below it, so the unchanged `Card` turns mars-red without a prop. A theme that leaves out a token fails `tsc` (kept as a `@ts-expect-error` line), and the build throws "Tokens don't match contract" if one slips through. Adding a color to the contract forces every theme to define it. The guard only covers keys. Nothing checks contrast or that a value is a color.
+
 ## Benchmarks
 
 <!-- bench:start -->
 
-Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.15.0, bun 1.3.13, Chromium 156.0.8078.4. Values are median (p95) of 10 runs. Raw data: `bench/results/`.
+Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.15.0, bun 1.3.13, Chromium 156.0.8078.4. Values are median (p95) of 10 runs. Raw data: `bench/results/`. `vanilla-extract` was measured 2026-10-16 in a separate run.
 
 ### Build time (seconds, `bun run build`)
 
@@ -228,6 +264,7 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 | linaria | 4.22 (4.64) | 2.14 (2.24) | 869 (903) |
 | stylex | 4.59 (4.98) | 1.67 (1.71) | 838 (859) |
 | panda | 3.13 (3.41) | 1.79 (1.88) | 822 (841) |
+| vanilla-extract | 4.47 (5.18) | 2.85 (2.94) | 927 (940) |
 
 ### First-load bytes for `/` (brotli)
 
@@ -239,6 +276,7 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 | linaria | 2.2 KB | 150.8 KB | +2.2 KB | 3.4 KB |
 | stylex | 2.6 KB | 149.4 KB | +0.8 KB | 3.9 KB |
 | panda | 2.8 KB | 153.8 KB | +5.2 KB | 3.8 KB |
+| vanilla-extract | 2.6 KB | 148.4 KB | -0.1 KB | 3.4 KB |
 
 ### Browser cost for `/` (ms, Chromium, 4× CPU throttle)
 
@@ -250,15 +288,16 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 | linaria | 0.4 (0.9) | 3.3 (4.7) | 22.7 (28.5) | 64.0 (76.0) | 64.0 (76.0) | 2.8 (3.7) |
 | stylex | 0.6 (0.9) | 3.4 (4.3) | 22.6 (27.9) | 64.0 (72.0) | 64.0 (72.0) | 2.7 (3.8) |
 | panda | 0.8 (1.1) | 4.0 (4.5) | 23.8 (26.9) | 66.0 (76.0) | 66.0 (76.0) | 3.2 (3.8) |
+| vanilla-extract | 0.6 (1.2) | 3.5 (4.3) | 23.2 (26.3) | 68.0 (68.0) | 68.0 (68.0) | 2.7 (3.9) |
 
 <!-- bench:end -->
 
 ### Reading the numbers
 
-- **Bundle size barely separates them.** CSS is 2 to 4 KB everywhere, and roughly 149 KB of JS is the Next/React baseline. The JS deltas come from the one client component (`ThemeToggle`), which pulls in each library's runtime helper: `stylex.props` and yak (+0.8 KB), Linaria's `styled` (+2.2 KB), and Panda's `css()` and `cx` (+5.2 KB, because Panda computes class names at runtime). Server components ship no styling JS in any app. The more client components you style, the more these deltas matter.
+- **Bundle size barely separates them.** CSS is 2 to 4 KB everywhere, and roughly 149 KB of JS is the Next/React baseline. The JS deltas come from the one client component (`ThemeToggle`), which pulls in each library's runtime helper: `stylex.props` and yak (+0.8 KB), Linaria's `styled` (+2.2 KB), and Panda's `css()` and `cx` (+5.2 KB, because Panda computes class names at runtime). vanilla-extract adds nothing (−0.1 KB, within noise), because `ThemeToggle` only imports class-name strings. Server components ship no styling JS in any app. The more client components you style, the more these deltas matter.
 - **Tailwind ships the most CSS**, 3.7 KB against 2.2 to 2.8 KB for the rest. That's preflight plus one utility per value used.
 - **The browser can't tell them apart.** Parse, style recalculation, layout, FCP and LCP all fall within noise. Between two full benchmark runs, the same app's FCP median moved by up to 14 ms (Panda measured 72, 80 and 66 ms across three runs), which is more than the gap between any two apps. The one repeat outlier is Tailwind's theme-toggle recalculation, 4.9 to 5.7 ms against about 3 ms elsewhere in every run, likely from the `:where([data-theme=light] *)` variant on the icons. That's real but tiny.
-- **Build time is the only meaningful difference.** Tailwind, CSS Modules, Panda and next-yak finish cold builds within 0.6 s of each other. Linaria costs about 1.1 s more (it executes style code in Node), and StyleX about 1.5 s more (Babel over every file). With a warm cache, all six build in 1.7 to 2.1 s.
+- **Build time is the only meaningful difference.** Tailwind, CSS Modules, Panda and next-yak finish cold builds within 0.6 s of each other. Linaria costs about 1.1 s more (it executes style code in Node), and StyleX about 1.5 s more (Babel over every file). With a warm cache, the first six build in 1.7 to 2.1 s. vanilla-extract costs about 1.2 s more cold and is the slowest warm build at 2.9 s, with the highest peak memory (927 MB). Its loader evaluates every `.css.ts` file in Node, and the warm number suggests that work isn't cached between builds. It was measured a day after the others, so CSS Modules was re-timed the same day as a check: 3.44 s mean over 5 cold builds, close to the 3.23 s in the table.
 
 ## Problems hit during setup
 
@@ -313,6 +352,15 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 - `prepare: panda codegen` fails on the first install, before `panda.config.ts` exists.
 - v2.0 removed template-literal syntax. In v1, `syntax: "template-literal"` gave `css` and `styled` templates with nesting and tokens via `{fontSizes.md}`, but no recipes, patterns, typed tokens or dynamic interpolation. Using it now means staying on `@pandacss/dev@1.12.1`. This repo uses object syntax.
 
+**vanilla-extract**
+- Turbopack is opt-in. Without `unstable_turbopack: { mode: "on" }` (or `"auto"`) the Next plugin only configures webpack. With it, `next build` worked on Turbopack and no fallback was needed.
+- The Turbopack loader evaluates each `.css.ts` file in Node through vite-node, so runtime checks run at build time. A `createTheme` with a missing token fails `tsc` and then fails the build with "Tokens don't match contract". The showcase keeps its negative example inside a function that is never called.
+- `selectors` may only target the element itself (`&:hover`, `[data-x] &`). Styling a child such as an `svg` needs a separate `globalStyle` rule on `${base} svg`. Recipe variant classes aren't exported, so per-size icon sizes are set with `createVar()` in each size variant and read by one `globalStyle` on the base class.
+- Theme-dependent visibility (`sun`/`moon`) needs empty `style({})` classes as hooks for a `globalStyle` selector.
+- Var names are hashed by default. `createGlobalThemeContract` with a map function (`path` → kebab case) keeps them identical to the other apps, `--color-accent`, `--spacing-6`.
+- Biome's `useSortedKeys` sorts style objects alphabetically, not in the logical order `useSortedProperties` uses for CSS, and moves `:hover`, `@media` and `@container` to the top. It leaves computed keys such as `[media.md]` and `[media.lg]` alone, so the mobile-first order of the queries is kept.
+- `bun install` blocks the `@swc/core` postinstall the plugin pulls in. The build works without it.
+
 ## Recommendation
 
 **For a styled-components codebase that prefers template literals, use next-yak.**
@@ -330,19 +378,20 @@ Where the others fit:
 
 - **CSS Modules** if you'd rather depend on nothing. It's native CSS with nesting, `@custom-media`, `@scope` and `:has()`, with no lock-in. Class names aren't type-checked unless you add a codegen step, and container queries can't use tokens. It's also the fallback if next-yak stalls, since yak compiles to `.yak.module.css` files anyway.
 - **Linaria** gives the same authoring as yak plus real JS evaluation at build time. You give up conditional variant blocks (data attributes instead), mixins become untyped strings, and cold builds take about 1.1 s longer. Choose it over yak only if computed styles matter.
-- **StyleX** if the compiler must enforce the design system. It has typed style contracts, deterministic merging and the strongest guardrails for agents. You give up template literals, descendant selectors (component APIs change to fit) and about 1.5 s per cold build, the most of the six.
-- **Panda** for typed tokens and recipes with `strictTokens`. It's object syntax again (template literals are gone in v2), with a codegen step, and it ships the most client JS of the six.
+- **StyleX** if the compiler must enforce the design system. It has typed style contracts, deterministic merging and the strongest guardrails for agents. You give up template literals, descendant selectors (component APIs change to fit) and about 1.5 s per cold build, the most of the seven.
+- **vanilla-extract** if you want CSS Modules with types. Every class is a typed export, so `styles.itemTitel` fails `tsc`, tokens are typed and themes must fill the whole contract. It's object syntax, and children are styled with a separate `globalStyle` rather than nested selectors. Turbopack support is still labeled unstable, and builds are slower: about 1.2 s cold and 1 s warm over CSS Modules.
+- **Panda** for typed tokens and recipes with `strictTokens`. It's object syntax again (template literals are gone in v2), with a codegen step, and it ships the most client JS of the seven.
 - **Tailwind** doesn't fit the stated preferences, and nothing here contradicts the class-soup notes. Variants need `cva`, merges need `tailwind-merge` configured with duplicated token names, and media queries live on every element.
 
 ## TypeScript 7
 
 Every app and the bench run on TypeScript 7.0.2, the Go port of the compiler. I started on 6.0.3 because the 7 package has no `lib/tsserverlibrary.js` and no stable JS API, and I assumed Next.js needed both. Testing showed that only editor plugins need them.
 
-What works on 7, in all six apps:
+What works on 7, in all seven apps:
 
 - `next build`. Next 16.4 type-checks by running the `tsc` CLI, and a planted `const x: number = "nope"` failed the build with TS2322.
-- `tsc --noEmit`, including the `@ts-expect-error` guards in the StyleX and Panda showcases, which still reject what they should.
-- Every styling tool. Panda codegen, StyleX's Babel plugin, wyw (oxc) and next-yak (SWC) don't use the TypeScript API, and neither does Biome.
+- `tsc --noEmit`, including the `@ts-expect-error` guards in the StyleX, Panda and vanilla-extract showcases, which still reject what they should.
+- Every styling tool. Panda codegen, StyleX's Babel plugin, wyw (oxc), next-yak (SWC) and vanilla-extract (vite-node) don't use the TypeScript API, and neither does Biome.
 
 `tsc --noEmit` time, median of 5 runs with no incremental cache:
 
@@ -354,6 +403,7 @@ What works on 7, in all six apps:
 | linaria | 1.01 s | 0.16 s |
 | stylex | 1.13 s | 0.20 s |
 | panda | 1.22 s | 0.24 s |
+| vanilla-extract | not measured (added after the switch) | 0.20 s |
 
 That's about 6 times faster. On an app this small it saves under a second per check. On a large codebase the same ratio matters a lot more.
 
@@ -432,3 +482,23 @@ Things to know:
 Worth adding:
 
 - `@stylexjs/eslint-plugin` checks property values and sorts keys, which Biome can't do for StyleX. It means running ESLint next to Biome, which this repo avoids, so it's a trade-off rather than a free win.
+
+### vanilla-extract
+
+What's set up in `apps/vanilla-extract`:
+
+| Need | How | Where |
+| --- | --- | --- |
+| One import for tokens, breakpoints and mixins | `src/theme/index.ts` re-exports `vars`, `media`, `container`, `cardContainer`, `surface` and `focusRing`, so style files import from `@/theme`. The plugin evaluates `.css.ts` files at build time, so the barrel and the `@/` alias both work | `src/theme/index.ts` |
+| Same variable names as the other apps | `createGlobalThemeContract(tokens, (_, path) => kebab(path))` gives `--color-accent` and `--spacing-6` instead of hashes. `palette` is dropped from the path, so primitives are `--mars-400` | `src/theme/tokens.css.ts` |
+| Class-name and token typos fail `tsc` | Styles are named exports (`import * as styles from "./Card.css"`), so `styles.itemTitel` and `vars.color.acent` are type errors. No editor extension is needed | all `.css.ts` files |
+| Typed variants | `RecipeVariants<typeof button>` types `Button`'s `variant` and `size` props from the recipe | `src/components/Button.css.ts` |
+| Complete themes | `createTheme(vars.color, …)` fails `tsc` when a token is missing (see `/showcase`) | `src/showcase/TripCard.css.ts` |
+| Consistent key order | Biome's `useSortedKeys` assist, turned on only for `*.css.ts` and applied on save | `biome.json`, `.vscode/settings.json` |
+| Global styles | `globalStyle` in `src/theme/global.css.ts`, imported once by the layout. The app has no `.css` files | `src/theme/global.css.ts`, `src/app/layout.tsx` |
+
+Things to know:
+
+- Style objects are plain TypeScript, so Biome formats all of them, but no CSS linting runs on them. A misspelled property is caught by `tsc` (csstype), an invalid value like `display: "flx"` isn't caught by either.
+- Children are styled outside the object, with a `globalStyle` rule on `${parent} svg`. It works, but the rule sits away from the class it belongs to, which is the nesting the template-literal libraries do inline.
+- `unstable_turbopack` may change between plugin releases. Re-run lint, typecheck and build on every upgrade.

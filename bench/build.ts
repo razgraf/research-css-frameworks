@@ -30,6 +30,7 @@ for (const app of selected) {
   run("bun", ["install", "--frozen-lockfile"], appDir(app));
   writeResult(`build-${app}`, {
     app,
+    date: new Date().toISOString().slice(0, 10),
     unit: "ms",
     cold: hyperfine(app, "cold"),
     warm: hyperfine(app, "warm"),
