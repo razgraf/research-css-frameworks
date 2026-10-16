@@ -1,6 +1,6 @@
-# CSS frameworks comparison
+# CSS frameworks comparison (2026 edition)
 
-The same Next.js landing page ("Visit Mars") built seven times, once per styling approach, to decide what replaces styled-components. Every app has the same tokens, components, light/dark theme, breakpoints and container query. The only differences are how each library expresses them.
+The same Next.js landing page ("Visit Mars") built seven times, once per styling approach, to decide what framework to design with in 2026. Every app has the same tokens, components, light/dark theme, breakpoints and container query. The only differences are how each library expresses them.
 
 | App                                            | Library                             | Authoring style                                |
 | ---------------------------------------------- | ----------------------------------- | ---------------------------------------------- |
@@ -12,7 +12,9 @@ The same Next.js landing page ("Visit Mars") built seven times, once per styling
 | [`apps/panda`](apps/panda)                     | Panda CSS 2.2                       | `css()` objects + recipes                      |
 | [`apps/vanilla-extract`](apps/vanilla-extract) | vanilla-extract 1.21                | `style()` objects in `.css.ts` files + recipes |
 
-Each app is standalone, with its own lockfile and configs, and nothing is shared between them. `PLAN.md` has the full spec and `PRD.md` the original brief.
+Each app is standalone, with its own lockfile and configs, and nothing is shared between them. `PLAN.md` has the full spec.
+
+The `RESULT.md` file contains a summary of all findings, preferences and quirks I've found in every framework post-review. It also poses some questions that could help you chose a winner, alongside my own take.
 
 > [!IMPORTANT]
 > Open each app as its own VS Code window, e.g. `code apps/tailwind`, not the repo root. VS Code only reads `.vscode/settings.json` and `.vscode/extensions.json` from the folder you open, so from the root none of the per-app settings or extension recommendations apply, and Biome and TypeScript won't pick up the app's config.

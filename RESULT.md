@@ -216,61 +216,39 @@ Some per-solution findings.
 | ------------ | --------------------------------------------------------------------- |
 | (Co)Location | Separate `.css.ts` files for styling and components, like CSS Modules |
 
-## Analysis (Subjective)
-
-- 🐼-🤔 Vanilla-extract gets dropped since
-  1.  if we're going with object syntax, StyleX has much better tooling and no special-generated-folder overhead.
-
-- 🐼-🤔 Panda gets dropped since
-  1.  if we're going with object syntax, StyleX has much better tooling and no special-generated-folder overhead.
-
-- ☀️-🤔 | 🐂-🤔 Linaria and next-yak (`@yak/react`)
-  1.  rely on an old styled components VSCode extension for syntax highlighting.
-  2.  template literals with inserted variables and wrapped objects seem to bring more runtime work, so they're not as performant
-
-- 🔷-🤔 StyleX seems to have the worst DX our of all, although best AIX
-
 ### Questions
 
-Between `css-modules`, `stylex`, `linaria`, `next-yak`, `panda`
-
-#### Q: A:Native-CSS Syntax or B:Object Syntax
+#### Q: A: Native-CSS Syntax or B: Object Syntax or C: Custom Syntax
 
 - **A** (Native-CSS Syntax): css-modules, next-yak, linaria
 - **B** (Object Syntax): stylex, vanilla-extract, panda
+- **C** (Custom Syntax): tailwind
 
-#### Q: Is styled-components important enough to lose (or experience degraded) syntax highlighting, formatting and auto-complete
+#### Q: Is styled-components important enough that you experience degraded syntax highlighting, formatting and auto-complete
 
-- **Yes**
-- **No**: Drop linaria, next-yak
+- **Yes**: You're a styled-component diehard, so go for linaria or next-yak
+- **No**: Drop linaria, next-yak. Not worth the degraded experience.
 
 #### Q: Are we using A: Biome, B: ESLint or C: Both
 
-- **A** Biome: stylex probably dropped, since some linting that's only available to ESLint
+- **A** Biome: Drop stylex (10.2026), since some linting that's only available to ESLint. next-yak and Linaria dropped to since most tooling is for ESLint and Stylelint.
 - **B** ESLint
 - **C** Both
 
 ### Q: Are multiple imports acceptable
 
 - **Yes**
-- **No**: Drop stylex
+- **No**: Drop stylex, it's very particular with its imports from `.stylex.ts`
 
-### Q: Are we aiming for a large community / lots of support
+### Q: Are you aiming for a large community / lots of support
 
-- **Yes**: Lean towards tailwind, css-modules, maybe stylex
-- **No**
+- **Yes**: tailwind, css-modules, maybe stylex and panda. Or linaria if still in the game.
+- **No**: panda, next-yak
 
 ### Q: Is colocation of styles and markup a good thing?
 
-### Some thoughts
+## My view
 
 - CSS-modules are the sweet spot. They can do the job, but they're not sexy.
 - StyleX would be a cool try that AI would love and we would probably hate for DX. Panda looks better.
 - Tailwind needs good best practices from us to fix class soup. It does encourage design systems the most. But it's far from native css writing.
-
-## Decisions
-
-We like: CSS-Modules, Panda.
-
-CSS-Modules: Work on biome rules for CI/CD checks, work on an Extension to highlight and show more details for `composes`. Try https://github.com/mizdra/css-modules-kit.
-Panda: Try it out, see what can be improved in syntax (invest some practices), see if we can order things with biome (e.g. rules)
