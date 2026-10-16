@@ -1,0 +1,33 @@
+{
+  "app": "vanilla-extract",
+  "unit": "bytes",
+  "firstLoad": {
+    "html": {
+      "raw": 17475,
+      "gzip": 4094,
+      "brotli": 3522
+    },
+    "css": {
+      "raw": 9372,
+      "gzip": 3092,
+      "brotli": 2644
+    },
+    "js": {
+      "raw": 572630,
+      "gzip": 176203,
+      "brotli": 151992
+    }
+  },
+  "total": {
+    "css": {
+      "raw": 9970,
+      "gzip": 3380,
+      "brotli": 2873
+    },
+    "js": {
+      "raw": 575141,
+      "gzip": 177409,
+      "brotli": 153083
+    }
+  }
+}
