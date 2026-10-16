@@ -267,3 +267,10 @@ Between `css-modules`, `stylex`, `linaria`, `next-yak`, `panda`
 - CSS-modules are the sweet spot. They can do the job, but they're not sexy.
 - StyleX would be a cool try that AI would love and we would probably hate for DX. Panda looks better.
 - Tailwind needs good best practices from us to fix class soup. It does encourage design systems the most. But it's far from native css writing.
+
+## Decisions
+
+We like: CSS-Modules, Panda.
+
+CSS-Modules: Work on biome rules for CI/CD checks, work on an Extension to highlight and show more details for `composes`. Try https://github.com/mizdra/css-modules-kit.
+Panda: Try it out, see what can be improved in syntax (invest some practices), see if we can order things with biome (e.g. rules)

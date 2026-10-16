@@ -64,6 +64,10 @@ const Base = styled.button<{ $variant: Variant; $size: Size }>`
 
 type Props = ComponentProps<"button"> & { variant?: Variant; size?: Size };
 
-export function Button({ variant = "primary", size = "medium", ...props }: Props) {
+export function Button({
+  variant = "primary",
+  size = "medium",
+  ...props
+}: Props) {
   return <Base type="button" $variant={variant} $size={size} {...props} />;
 }
