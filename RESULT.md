@@ -3,7 +3,7 @@
 Before running this experiment, we're going to establish some requirements.
 
 > [!IMPORTANT]
-> Caveat: Most items are objective, and some are subjective. The latter are based on prior usage and preference on native CSS or CSS-in-JS libraries allowing for clean non-object syntax (`styled-components` I'm looking at you).
+> Caveat: These priorities are my own lens. Most items are objective, and some are subjective. The latter are based on prior usage and preference on native CSS or CSS-in-JS libraries allowing for clean non-object syntax (`styled-components` I'm looking at you). To apply your own priorities, skip to [Questions](#questions).
 
 ### Priority: Must-have
 
@@ -16,7 +16,7 @@ Before running this experiment, we're going to establish some requirements.
 3. Linting
    - acknowledgement of unknown or misspelled rules
 4. Design system or design token support
-   - media queries _shouldn't have hardcoded repeated values_
+   - `@media` queries _shouldn't have hardcoded repeated values_
 5. Server-side support (RSC)
 
 ### Priority: Nice-to-have
@@ -36,7 +36,7 @@ Before running this experiment, we're going to establish some requirements.
     - no class soup, easy to refactor "chunks"
     - template literals or native CSS support > object syntax
     - composability
-12. Performance at scale
+12. Performance at scale _(not measured here, see the note under [Findings](#findings))_
 
 ## Experiment
 
@@ -63,6 +63,9 @@ Others that have been considered
 
 Some per-solution findings.
 
+> [!NOTE]
+> Build and bundle numbers come from a single-page benchmark. They measure each tool's fixed overhead, not performance at scale, so they're listed as neutral.
+
 ### CSS Modules
 
 | Key     | Advantage                                                                                                 |
@@ -83,11 +86,11 @@ Some per-solution findings.
 | Setup   | For full type-safety in CI/CD, it has to produce `*.d.ts` files to match class names. Editor auto-complete is handled by `clinyong.vscode-css-modules`. |
 | Editor  | `var(--…)` autocomplete only with the CSS Variables extension (`vunguyentuan.vscode-css-variables`)                                                     |
 | Linting | Biome's `noUndeclaredCustomProperties` is nursery and needs `@import "@/theme/tokens.css"` at the top of each file                                      |
-| Size    | Only at large scale. CSS grows with the number of components, while atomic CSS (StyleX, Tailwind) levels off                                            |
 
-| Key          | Neutral or informational                     |
-| ------------ | -------------------------------------------- |
-| (Co)Location | 👐 Separate files for styling and components |
+| Key          | Neutral or informational                                                                                                     |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| (Co)Location | 👐 Separate files for styling and components                                                                                 |
+| Size         | Not measured at scale. CSS is expected to grow with the number of components, while atomic CSS (StyleX, Tailwind) levels off |
 
 ### Tailwind
 
@@ -99,10 +102,10 @@ Some per-solution findings.
 | Community     | Largest community, AI friendly                                                    |
 | Styles        | Tons of ready-made styles and edge-cases taken care of from their utility classes |
 
-| Key     | Disadvantage                                                                                       |
-| ------- | -------------------------------------------------------------------------------------------------- |
-| Syntax  | Class soup and custom syntax for everything. Media queries are prefixes on every class, no nesting |
-| Linting | Biome doesn't flag unknown classes (`bg-red-500`), only IntelliSense does                          |
+| Key     | Disadvantage                                                                                                             |
+| ------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Syntax  | Class soup and custom syntax for everything. Media queries are prefixes on every class, no nesting                       |
+| Linting | Biome doesn't flag unknown classes (`bg-red-500`). Only IntelliSense does, so they're caught in the editor but not in CI |
 
 | Key      | Temporary / minor inconvenience                                                                    |
 | -------- | -------------------------------------------------------------------------------------------------- |
@@ -120,16 +123,16 @@ Some per-solution findings.
 | Type-safety | Style-contracts `StyleXStyles<{ margin?: string \| number }>`, good for AI  |
 | Editor      | Everything is TypeScript, so autocomplete and typo checks need no extension |
 
-| Key     | Disadvantage                                                                                                                    |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Imports | Design tokens need to be imported every time, and only as named imports from a `*.stylex.ts` file                               |
-| Imports | Impossible to colocate all imports due to how the parser looks for `stylex.ts` files. Regular files could need up to 3 imports. |
-| Build   | Needs a pass with Babel over all app code, slowest cold build (+1.4 s over CSS Modules)                                         |
-| Linting | Official plugin is ESLint only, Biome can't check values or sort keys                                                           |
+| Key     | Disadvantage                                                                                                                            |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Imports | Design tokens need to be imported every time, and only as named imports from a `*.stylex.ts` file                                       |
+| Imports | Impossible to colocate all imports due to how the parser looks for `stylex.ts` files. Components here need 2 (`index.stylex` + mixins). |
+| Linting | Official plugin is ESLint only. Biome can't check values or sort keys, so only TypeScript types catch mistakes                          |
 
 | Key          | Neutral or informational                                                                                                              |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
 | (Co)Location | 🤝 Styles live in the component file                                                                                                  |
+| Build        | Needs a pass with Babel over all app code. Slowest cold build here (+1.4 s over CSS Modules)                                          |
 | Community    | Backed by Meta, used by Linear and Polar                                                                                              |
 | Syntax       | `{...stylex.props(…)}` spread everywhere. Fixed (in most places) with `sx` on the element, but not on external components e.g. Lucide |
 
@@ -139,15 +142,15 @@ Some per-solution findings.
 | ----------- | ------------------------------------------------------------------------- |
 | Type-safety | Typed tokens with `strictTokens`, typed recipes and slot recipes (`sva`). |
 
-| Key    | Disadvantage                                                                                                                           |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Setup  | Produces a `styled-system` folder (~130 generated files) for type annotations                                                          |
-| Syntax | Object syntax with a `css()` wrapper on all rules, and custom syntax, in particular for media queries (`px: { base: "6", md: "12" }`). |
-| Size   | Most client JS of the seven (+5.2 KB), since `css()` and `cx` compute class names at runtime                                           |
+| Key    | Disadvantage                                                                                                                                                                                                 |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Setup  | Produces a `styled-system` folder (~130 generated files) for type annotations                                                                                                                                |
+| Syntax | Object syntax with a `css()` wrapper on all rules. Panda's own keys (`px`, `_hover`, `{ base, md }`) are mostly optional, since `&:hover` and raw `@media` work too, but token breakpoints need its `md` key |
 
-| Key   | Temporary / minor inconvenience                                                                   |
-| ----- | ------------------------------------------------------------------------------------------------- |
-| Setup | `prepare: panda codegen` fails on first install. Breakpoints written in `px` are emitted as `rem` |
+| Key   | Temporary / minor inconvenience                                                                                                                                                                                                   |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Setup | `prepare: panda codegen` fails on first install. Breakpoints written in `px` are emitted as `rem`                                                                                                                                 |
+| Size  | `css()` ships a ~5 KB runtime in client components. The docs' fix is source transforms, which need webpack in Next 16. On Turbopack, styling in server components and passing class names down avoids it (tested, not documented) |
 
 ### Linaria
 
@@ -162,21 +165,18 @@ Some per-solution findings.
 | Editor     | Bad syntax highlighting. Mixins are plain strings, so editors don't highlight them and Biome doesn't format them |
 | Formatting | Styled-components rule sorting relied on ESLint/Stylelint plugins, which are outdated                            |
 
-| Key     | Temporary / minor inconvenience                                 |
-| ------- | --------------------------------------------------------------- |
-| Build   | About 1 s slower cold build than CSS Modules                    |
-| Imports | Design tokens need to be imported every time (same as next-yak) |
-
 | Key       | Neutral or informational                                                                                                   |
 | --------- | -------------------------------------------------------------------------------------------------------------------------- |
 | Community | Popular (12.4K stars), now maintained under `wyw-in-js` (although creator started dx-styles as a replacement for Linaria ) |
+| Build     | About 1 s slower cold build than CSS Modules                                                                               |
+| Imports   | Tokens, breakpoints and mixins can come from one `@/theme` barrel (tested, identical output). The app uses three imports   |
 
 ### next-yak
 
 | Key    | Advantage                                                                                                                   |
 | ------ | --------------------------------------------------------------------------------------------------------------------------- |
 | Syntax | Template literals. `styled`, `css` mixins, prop variants, component selectors and nesting port from styled-components as-is |
-| Build  | SWC, zero runtime, small cost (+0.45 s cold, +0.8 KB client JS)                                                             |
+| Build  | SWC, zero runtime                                                                                                           |
 
 | Key        | Disadvantage                                                                                  |
 | ---------- | --------------------------------------------------------------------------------------------- |
@@ -186,13 +186,14 @@ Some per-solution findings.
 
 | Key     | Temporary / minor inconvenience                                                                                                                                   |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Imports | Design tokens need to be imported every time.                                                                                                                     |
 | Imports | The `${theme => …}` import reverts to **runtime**: a function call per interpolation, inline `style="--x: …"`, larger HTML, and a React re-render on theme switch |
 | Tokens  | Declared twice (CSS variables and TS refs). The constant parser only reads identifier keys and no `as const`, so `spacing.s8` instead of `spacing[8]`             |
 
-| Key       | Neutral or informational                            |
-| --------- | --------------------------------------------------- |
-| Community | Small, backed by a single company (Digitec Galaxus) |
+| Key       | Neutral or informational                                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Community | Small, backed by a single company (Digitec Galaxus)                                                                      |
+| Build     | +0.45 s cold build, +0.8 KB client JS                                                                                    |
+| Imports   | Tokens, breakpoints and mixins can come from one `@/theme` barrel (tested, identical output). The app uses three imports |
 
 ### vanilla-extract
 
@@ -202,10 +203,10 @@ Some per-solution findings.
 | Imports     | Barrel import from `@/theme` works, since `.css.ts` files are evaluated at build time                 |
 | Size        | No runtime JS                                                                                         |
 
-| Key    | Disadvantage                                                                                  |
-| ------ | --------------------------------------------------------------------------------------------- |
-| Syntax | Object syntax. Children (e.g. `svg`) need a separate `globalStyle` rule instead of nesting    |
-| Build  | Slowest warm build (2.9 s) and highest peak memory. Turbopack support is `unstable_turbopack` |
+| Key    | Disadvantage                                                                               |
+| ------ | ------------------------------------------------------------------------------------------ |
+| Syntax | Object syntax. Children (e.g. `svg`) need a separate `globalStyle` rule instead of nesting |
+| Build  | Turbopack support is `unstable_turbopack`                                                  |
 
 | Key     | Temporary / minor inconvenience                                                                               |
 | ------- | ------------------------------------------------------------------------------------------------------------- |
@@ -215,39 +216,66 @@ Some per-solution findings.
 | Key          | Neutral or informational                                              |
 | ------------ | --------------------------------------------------------------------- |
 | (Co)Location | Separate `.css.ts` files for styling and components, like CSS Modules |
+| Build        | Slowest warm build (2.9 s) and highest peak memory                    |
 
 ### Questions
 
-#### Q: A: Native-CSS Syntax or B: Object Syntax or C: Custom Syntax
+Each answer only removes options. Answer them in any order, and whatever is left is your shortlist.
 
-- **A** (Native-CSS Syntax): css-modules, next-yak, linaria
-- **B** (Object Syntax): stylex, vanilla-extract, panda
-- **C** (Custom Syntax): tailwind
+> [!CAUTION]
+> Biome-only setups (as in every app here): Tailwind's unknown classes are only flagged by IntelliSense, and StyleX's value checks and key sorting live in `@stylexjs/eslint-plugin`. Both are caught in the editor (IntelliSense, TypeScript types), not by Biome in CI. ESLint plugins exist for both if you run ESLint next to Biome.
 
-#### Q: Is styled-components important enough that you experience degraded syntax highlighting, formatting and auto-complete
+#### Q: Which syntax would you reject? (pick any)
 
-- **Yes**: You're a styled-component diehard, so go for linaria or next-yak
-- **No**: Drop linaria, next-yak. Not worth the degraded experience.
+- **A** (Native CSS / template literals): drop css-modules, next-yak, linaria
+- **B** (Object syntax): drop stylex, vanilla-extract, panda[^panda]
+- **C** (Custom syntax): drop tailwind
 
-#### Q: Are we using A: Biome, B: ESLint or C: Both
+[^panda]: Panda's own keys (`px`, `_hover`, `{ base, md }`) are mostly optional. `&:hover` and raw `@media` work too, but token breakpoints need its `md` key.
 
-- **A** Biome: Drop stylex (10.2026), since some linting that's only available to ESLint. next-yak and Linaria dropped to since most tooling is for ESLint and Stylelint.
-- **B** ESLint
-- **C** Both
+#### Q: Are you migrating a styled-components codebase?
 
-### Q: Are multiple imports acceptable
+- **Yes**: keep only linaria and next-yak. next-yak ports `styled`, `css` mixins and prop variants as-is, while linaria turns conditional variants into data attributes
+- **No**: drop nothing
 
-- **Yes**
-- **No**: Drop stylex, it's very particular with its imports from `.stylex.ts`
+#### Q: Is styled-components syntax worth degraded syntax highlighting, formatting and autocomplete?
 
-### Q: Are you aiming for a large community / lots of support
+- **Yes**: drop nothing
+- **No**: drop linaria, next-yak. Highlighting and autocomplete rely on a styled-components extension last updated in 2023, Biome skips formatting templates that contain `${}`, and rule sorting relied on outdated ESLint/Stylelint plugins
 
-- **Yes**: tailwind, css-modules, maybe stylex and panda. Or linaria if still in the game.
-- **No**: panda, next-yak
+#### Q: Must the library, tokens, breakpoints and mixins come from a single import?
 
-### Q: Is colocation of styles and markup a good thing?
+- **Yes**: drop stylex. Tokens only resolve as named imports from `*.stylex.ts` files, so a component needs at least 2 theme imports
+- **No**: drop nothing
+
+#### Q: How large and active a community do you need?
+
+Measured 2026-10-18. Contributors are distinct human commit authors (bots excluded) on the default branch over the last 12 months. Commit counts depend on merge style (squash vs merge commits), so compare contributors and releases first. CSS Modules is part of the platform.
+
+| Library         | npm/week | Stars                       | Contributors (12 mo) | Commits 2025 / 2026 | Stable releases 2025 / 2026 | Latest release |
+| --------------- | -------- | --------------------------- | -------------------- | ------------------- | --------------------------- | -------------- |
+| tailwind        | 85.3M    | 97.9K                       | 66                   | 712 / 300           | 39 / 9                      | 2026-07-16     |
+| vanilla-extract | 1.61M    | 10.4K                       | 23                   | 73 / 78             | 6 / 8                       | 2026-10-08     |
+| stylex          | 1.18M    | 10.4K                       | 55                   | 427 / 240           | 25 / 7                      | 2026-09-15     |
+| linaria         | 293K     | 12.4K                       | 4                    | 12 / 51             | 1 / 6                       | 2026-08-10     |
+| ↳ `wyw-in-js`   | 109K     | 0.3K                        | 14                   | 39 / 449            | 4 / 31                      | 2026-10-15     |
+| panda           | 291K     | 6.2K                        | 22                   | 301 / 975           | 28 / 21                     | 2026-10-09     |
+| next-yak        | 7.8K     | 0.6K                        | 10                   | 141 / 143           | 24 / 15                     | 2026-09-28     |
+
+- **Large and active** (≥ 1M downloads/week and ≥ 20 contributors in 12 months): drop panda, linaria, next-yak
+- **Actively maintained, any size** (a stable release in the last 6 months and ≥ 10 contributors in 12 months): drop linaria. Its engine `wyw-in-js` is busy, but the `@linaria/*` packages had 12 commits and 1 release in 2025, and 4 contributors in the last year
+- **Don't care**: drop nothing
+
+#### Q: Where should styles live?
+
+- **In the component file**: drop css-modules, vanilla-extract (both require a separate file)
+- **Separable from markup**: drop tailwind (stylex, panda, linaria and next-yak can move styles to a sibling `*.styles.ts`)
+- **Don't care**: drop nothing
 
 ## My view
+
+> [!NOTE]
+> I have past experience with styled-components, CSS/Sass and Tailwind. Over time I came to like the DX of styled-components, and the utility of Tailwind for its zero-headache classes (although I did get annoyed by the class soup).
 
 - CSS-modules are the sweet spot. They can do the job, but they're not sexy.
 - StyleX would be a cool try that AI would love and we would probably hate for DX. Panda looks better.

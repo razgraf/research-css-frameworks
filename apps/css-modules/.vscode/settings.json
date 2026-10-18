@@ -1,7 +1,9 @@
 {
   "editor.defaultFormatter": "biomejs.biome",
   "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": { "source.biome.useSortedProperties": "explicit" },
+  "editor.codeActionsOnSave": {
+    "source.biome.useSortedProperties": "explicit"
+  },
   "files.associations": { "*.css": "css" },
   "css.customData": [".vscode/css-data.json"],
   "css.importAliases": { "@/": "/src/" },
