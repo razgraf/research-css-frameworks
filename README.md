@@ -560,3 +560,4 @@ Runtime values, documented in Panda's "Dynamic styling" page: Panda can't extrac
 - [Polar for StyleX](https://polar.sh/blog/orbit-llm-safe-design-system)
 - [Linear for StyleX](https://linear.app/now/styling-linear-for-the-future-stylex)
 - [Linaria vs Tailwind](https://swoodpartners.medium.com/css-in-js-en-2026-tailwind-4-ou-linaria-99d30052d529)
+- [Github moving to CSS Modules](https://x.com/github/status/2111156078293737607)

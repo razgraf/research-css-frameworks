@@ -6,7 +6,17 @@ type Props = ComponentProps<"button"> & {
   size?: "medium" | "large";
 };
 
-export function Button({ variant = "primary", size = "medium", className, ...props }: Props) {
-  const classes = [styles.button, styles[variant], styles[size], className].filter(Boolean);
+export function Button({
+  variant = "primary",
+  size = "medium",
+  className,
+  ...props
+}: Props) {
+  const classes = [
+    styles.button,
+    styles[variant],
+    styles[size],
+    className,
+  ].filter(Boolean);
   return <button type="button" className={classes.join(" ")} {...props} />;
 }

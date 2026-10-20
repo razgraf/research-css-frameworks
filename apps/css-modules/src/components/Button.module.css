@@ -9,7 +9,7 @@
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   border: 1px solid transparent;
-  border-radius: var(--radius-medium);
+  border-radius: var(--radius-full);
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
