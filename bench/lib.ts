@@ -13,6 +13,7 @@ export const apps = [
   "stylex",
   "panda",
   "vanilla-extract",
+  "zyzz",
 ] as const;
 export type App = (typeof apps)[number];
 export const runs = 10;

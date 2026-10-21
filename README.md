@@ -1,16 +1,17 @@
 # CSS frameworks comparison (2026 edition)
 
-The same Next.js landing page ("Visit Mars") built seven times, once per styling approach, to decide what framework to design with in 2026. Every app has the same tokens, components, light/dark theme, breakpoints and container query. The only differences are how each library expresses them.
+The same Next.js landing page ("Visit Mars") built eight times, once per styling approach, to decide what framework to design with in 2026. Every app has the same tokens, components, light/dark theme, breakpoints and container query. The only differences are how each library expresses them.
 
-| App                                            | Library                             | Authoring style                                |
-| ---------------------------------------------- | ----------------------------------- | ---------------------------------------------- |
-| [`apps/css-modules`](apps/css-modules)         | CSS Modules (built into Next)       | `.module.css` files                            |
-| [`apps/tailwind`](apps/tailwind)               | Tailwind CSS 4.3                    | utility classes + `cva`                        |
-| [`apps/next-yak`](apps/next-yak)               | next-yak 9.10                       | `styled` template literals (SWC)               |
-| [`apps/linaria`](apps/linaria)                 | Linaria 8.2 via `@wyw-in-js/nextjs` | `styled` template literals (build-time eval)   |
-| [`apps/stylex`](apps/stylex)                   | StyleX 0.19                         | `stylex.create` objects                        |
-| [`apps/panda`](apps/panda)                     | Panda CSS 2.2                       | `css()` objects + recipes                      |
-| [`apps/vanilla-extract`](apps/vanilla-extract) | vanilla-extract 1.21                | `style()` objects in `.css.ts` files + recipes |
+| App                                            | Library                             | Authoring style                                  |
+| ---------------------------------------------- | ----------------------------------- | ------------------------------------------------ |
+| [`apps/css-modules`](apps/css-modules)         | CSS Modules (built into Next)       | `.module.css` files                              |
+| [`apps/tailwind`](apps/tailwind)               | Tailwind CSS 4.3                    | utility classes + `cva`                          |
+| [`apps/next-yak`](apps/next-yak)               | next-yak 9.10                       | `styled` template literals (SWC)                 |
+| [`apps/linaria`](apps/linaria)                 | Linaria 8.2 via `@wyw-in-js/nextjs` | `styled` template literals (build-time eval)     |
+| [`apps/stylex`](apps/stylex)                   | StyleX 0.19                         | `stylex.create` objects                          |
+| [`apps/panda`](apps/panda)                     | Panda CSS 2.2                       | `css()` objects + recipes                        |
+| [`apps/vanilla-extract`](apps/vanilla-extract) | vanilla-extract 1.21                | `style()` objects in `.css.ts` files + recipes   |
+| [`apps/zyzz`](apps/zyzz)                       | zyzz 0.0.36                         | `style()` objects spread as props + `variants()` |
 
 Each app is standalone, with its own lockfile and configs, and nothing is shared between them. `PLAN.md` has the full spec.
 
@@ -49,27 +50,27 @@ bun run bench      # writes bench/results/*.json and the tables below
 - **Responsive layout.** Breakpoints are `sm` 640, `md` 768 and `lg` 1024. The hero goes from stacked to two columns at `lg`, the heading grows at `md` and `lg`, and the card list goes to two columns at `md`. The card's footer uses a **container query** (≥ 400px of card content) to switch from stacked buttons to a row.
 - **Server components.** Everything is a server component except `ThemeToggle`.
 
-The first six apps render the same page pixel for pixel. Screenshots at 375, 768 and 1280px in both themes showed 0 differing pixels against the CSS Modules app. vanilla-extract was added later and compared by eye at the same sizes, with the heading measured at 56px at 1280px in both.
+The first six apps render the same page pixel for pixel. Screenshots at 375, 768 and 1280px in both themes showed 0 differing pixels against the CSS Modules app. vanilla-extract was added later and compared by eye at the same sizes, with the heading measured at 56px at 1280px in both. zyzz was compared against CSS Modules by layout boxes and 15 computed properties on 16 elements at the same sizes and themes, with 0 differences.
 
 ## Requirement matrix
 
 ✅ works well · ⚠️ works with a cost · ❌ not supported or works against the library
 
-|                                            | CSS Modules                                                                     | Tailwind                                                              | next-yak                                          | Linaria                           | StyleX                                                                  | Panda                                        | vanilla-extract                                                                  |
-| ------------------------------------------ | ------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------- |
-| Design tokens                              | ⚠️ CSS variables, untyped in TS                                                 | ✅ `@theme` becomes utilities                                         | ⚠️ CSS variables + typed TS refs, declared twice  | ⚠️ same as yak                    | ✅ `defineVars`, typed                                                  | ✅ typed, `strictTokens`                     | ✅ `createGlobalThemeContract`, typed, stable names                              |
-| Light/dark                                 | ✅ `[data-theme]` overrides                                                     | ✅ same variables overridden in `@layer base`                         | ✅ `globalStyle`                                  | ✅ `:global()`                    | ✅ `light-dark()` + `color-scheme`                                      | ✅ semantic tokens `base` / `_light`         | ✅ `assignVars` under `[data-theme=light]`                                       |
-| Reusable chunks                            | ✅ `composes` (whole classes only)                                              | ⚠️ `@utility` in CSS, class strings in TS                             | ✅ `css` mixins interpolated                      | ⚠️ plain strings, no highlighting | ✅ shared `create` objects                                              | ✅ `layerStyles` + spread objects            | ✅ `style([surface, {…}])`                                                       |
-| Prop-driven variants                       | ✅ `styles[variant]`                                                            | ✅ `cva`                                                              | ✅ `${p => css…}`, same as styled-components      | ⚠️ data attributes only           | ✅ variant maps                                                         | ✅ config recipes, typed                     | ✅ `recipe()`, typed                                                             |
-| Media queries without literals             | ✅ `@custom-media` (2 PostCSS plugins)                                          | ✅ breakpoint tokens                                                  | ✅ TS constants                                   | ✅ TS constants                   | ✅ `defineConsts`                                                       | ✅ breakpoint tokens (emitted as `rem`)      | ✅ TS constants                                                                  |
-| Container queries without literals         | ❌ literal `400px`                                                              | ✅ `@card-wide:`                                                      | ✅ TS constant                                    | ✅ TS constant                    | ✅ `defineConsts`                                                       | ✅ `@/cardWide`                              | ✅ `createContainer()` + TS constant                                             |
-| Nesting + media queries inside the wrapper | ✅ native nesting                                                               | ❌ prefixes on every class                                            | ✅                                                | ✅                                | ❌ no descendant selectors                                              | ⚠️ per-property conditions, `& svg` allowed  | ⚠️ pseudo-classes and `@media` nest; children need a separate `globalStyle` rule |
-| Native CSS / template literals             | ✅ plain CSS                                                                    | ❌                                                                    | ✅                                                | ✅                                | ❌ objects                                                              | ❌ objects (template literals removed in v2) | ❌ objects                                                                       |
-| Biome lint + format                        | ✅ CSS, CSS Modules, `@custom-media`                                            | ⚠️ `tailwindDirectives`; unknown classes only flagged by IntelliSense | ⚠️ CSS inside `${}` templates isn't formatted     | ⚠️ same as yak                    | ⚠️ TS only; value checks and key sorting need `@stylexjs/eslint-plugin` | ✅                                           | ✅ (`useSortedKeys` sorts alphabetically)                                        |
-| Editor autocomplete/highlighting           | ✅ CSS language service + class names                                           | ✅ Tailwind IntelliSense                                              | ⚠️ styled-components extension (last update 2023) | ⚠️ same as yak                    | ✅ via TS types                                                         | ✅ via TS types (v2 extension unverified)    | ✅ via TS types                                                                  |
-| Type-safety                                | ⚠️ none for class names: Next types every module as `{ [key: string]: string }` | ⚠️ only `cva` props are typed                                         | ⚠️ token refs only                                | ⚠️ token refs only                | ✅ typed style contracts                                                | ✅ `strictTokens`, typed recipes             | ✅ typed tokens, theme contracts, recipes; class names are exports               |
-| Turbopack (`dev` + `build`)                | ✅                                                                              | ✅                                                                    | ✅                                                | ✅                                | ✅ (Babel runs on all app code)                                         | ✅                                           | ⚠️ `unstable_turbopack`                                                          |
-| Setup                                      | PostCSS + 2 plugins                                                             | 1 PostCSS plugin                                                      | 1 config wrapper                                  | 1 config wrapper                  | Babel + PostCSS config, layer ordering                                  | config + codegen (~130 generated files)      | 1 config wrapper                                                                 |
+|                                            | CSS Modules                                                                     | Tailwind                                                              | next-yak                                          | Linaria                           | StyleX                                                                  | Panda                                        | vanilla-extract                                                                  | zyzz                                                                                                    |
+| ------------------------------------------ | ------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Design tokens                              | ⚠️ CSS variables, untyped in TS                                                 | ✅ `@theme` becomes utilities                                         | ⚠️ CSS variables + typed TS refs, declared twice  | ⚠️ same as yak                    | ✅ `defineVars`, typed                                                  | ✅ typed, `strictTokens`                     | ✅ `createGlobalThemeContract`, typed, stable names                              | ✅ `defineVars`, typed token names; variables are `--z-color-accent`                                    |
+| Light/dark                                 | ✅ `[data-theme]` overrides                                                     | ✅ same variables overridden in `@layer base`                         | ✅ `globalStyle`                                  | ✅ `:global()`                    | ✅ `light-dark()` + `color-scheme`                                      | ✅ semantic tokens `base` / `_light`         | ✅ `assignVars` under `[data-theme=light]`                                       | ⚠️ `{dark, light}` pairs → `light-dark()`; non-color switches need zyzz's internal `z_scheme-*` classes |
+| Reusable chunks                            | ✅ `composes` (whole classes only)                                              | ⚠️ `@utility` in CSS, class strings in TS                             | ✅ `css` mixins interpolated                      | ⚠️ plain strings, no highlighting | ✅ shared `create` objects                                              | ✅ `layerStyles` + spread objects            | ✅ `style([surface, {…}])`                                                       | ✅ `style([surface, {…}])`, `cx(focusRing(), …)`                                                        |
+| Prop-driven variants                       | ✅ `styles[variant]`                                                            | ✅ `cva`                                                              | ✅ `${p => css…}`, same as styled-components      | ⚠️ data attributes only           | ✅ variant maps                                                         | ✅ config recipes, typed                     | ✅ `recipe()`, typed                                                             | ✅ `variants()`, typed, rendered as `data-*` attributes                                                 |
+| Media queries without literals             | ✅ `@custom-media` (2 PostCSS plugins)                                          | ✅ breakpoint tokens                                                  | ✅ TS constants                                   | ✅ TS constants                   | ✅ `defineConsts`                                                       | ✅ breakpoint tokens (emitted as `rem`)      | ✅ TS constants                                                                  | ✅ `'@media >=md'` breakpoint tokens                                                                    |
+| Container queries without literals         | ❌ literal `400px`                                                              | ✅ `@card-wide:`                                                      | ✅ TS constant                                    | ✅ TS constant                    | ✅ `defineConsts`                                                       | ✅ `@/cardWide`                              | ✅ `createContainer()` + TS constant                                             | ✅ `'@container card >=cardWide'`                                                                       |
+| Nesting + media queries inside the wrapper | ✅ native nesting                                                               | ❌ prefixes on every class                                            | ✅                                                | ✅                                | ❌ no descendant selectors                                              | ⚠️ per-property conditions, `& svg` allowed  | ⚠️ pseudo-classes and `@media` nest; children need a separate `globalStyle` rule | ✅ pseudo-classes and `@media` nest; children via `selectors: { "& svg" }` in the same object           |
+| Native CSS / template literals             | ✅ plain CSS                                                                    | ❌                                                                    | ✅                                                | ✅                                | ❌ objects                                                              | ❌ objects (template literals removed in v2) | ❌ objects                                                                       | ❌ objects                                                                                              |
+| Biome lint + format                        | ✅ CSS, CSS Modules, `@custom-media`                                            | ⚠️ `tailwindDirectives`; unknown classes only flagged by IntelliSense | ⚠️ CSS inside `${}` templates isn't formatted     | ⚠️ same as yak                    | ⚠️ TS only; value checks and key sorting need `@stylexjs/eslint-plugin` | ✅                                           | ✅ (`useSortedKeys` sorts alphabetically)                                        | ⚠️ TS only; zyzz's own checks ship as an oxlint plugin                                                  |
+| Editor autocomplete/highlighting           | ✅ CSS language service + class names                                           | ✅ Tailwind IntelliSense                                              | ⚠️ styled-components extension (last update 2023) | ⚠️ same as yak                    | ✅ via TS types                                                         | ✅ via TS types (v2 extension unverified)    | ✅ via TS types                                                                  | ✅ via TS types                                                                                         |
+| Type-safety                                | ⚠️ none for class names: Next types every module as `{ [key: string]: string }` | ⚠️ only `cva` props are typed                                         | ⚠️ token refs only                                | ⚠️ token refs only                | ✅ typed style contracts                                                | ✅ `strictTokens`, typed recipes             | ✅ typed tokens, theme contracts, recipes; class names are exports               | ✅ token-only values (`!custom` to opt out), typed variants and dynamic values; checked again at build  |
+| Turbopack (`dev` + `build`)                | ✅                                                                              | ✅                                                                    | ✅                                                | ✅                                | ✅ (Babel runs on all app code)                                         | ✅                                           | ⚠️ `unstable_turbopack`                                                          | ✅ (`zyzz/next`, also webpack)                                                                          |
+| Setup                                      | PostCSS + 2 plugins                                                             | 1 PostCSS plugin                                                      | 1 config wrapper                                  | 1 config wrapper                  | Babel + PostCSS config, layer ordering                                  | config + codegen (~130 generated files)      | 1 config wrapper                                                                 | 1 config wrapper                                                                                        |
 
 ## Side by side
 
@@ -207,6 +208,41 @@ export const button = recipe({
 // <button className={button({ variant, size })} />
 ```
 
+**zyzz.** A `variants()` recipe co-located in the component. Values are token names, children are styled in the same object, and the result is spread onto the element:
+
+```tsx
+namespace styles {
+  export const button = variants({
+    base: {
+      borderRadius: "medium",
+      display: "inline-flex",
+      fontWeight: "medium",
+    },
+    variants: {
+      size: {
+        medium: {
+          fontSize: "small",
+          paddingInline: "4",
+          selectors: {
+            "& svg": {
+              height: vars.iconSize.small,
+              width: vars.iconSize.small,
+            },
+          },
+        },
+      },
+      variant: {
+        primary: {
+          backgroundColor: "accent",
+          ":hover": { backgroundColor: "accentHover" },
+        },
+      },
+    },
+  });
+}
+// <button {...cx(focusRing(), styles.button({ variant, size }))} />
+```
+
 ### Card: media query and container query
 
 ```css
@@ -262,6 +298,18 @@ export const footer = style({
   "@container": { [container.cardWide]: { flexDirection: "row" } },
   flexDirection: "column-reverse",
 });
+
+// zyzz
+export const card = style([surface, {
+  containerName: "card",
+  containerType: "inline-size",
+  padding: "6",
+  "@media >=md": { padding: "8" },
+}]);
+export const footer = style({
+  flexDirection: "column-reverse",
+  "@container card >=cardWide": { flexDirection: "row" },
+});
 ```
 
 ## Showcases
@@ -282,11 +330,13 @@ Each app has a `/showcase` route (`src/showcase/TripCard.tsx`) with one thing th
 
 **vanilla-extract: typed theme contracts.** `createTheme(vars.color, tokens)` returns a class that re-skins every semantic color below it, so the unchanged `Card` turns mars-red without a prop. A theme that leaves out a token fails `tsc` (kept as a `@ts-expect-error` line), and the build throws "Tokens don't match contract" if one slips through. Adding a color to the contract forces every theme to define it. The guard only covers keys. Nothing checks contrast or that a value is a color.
 
+**zyzz: typed values and responsive variants.** The countdown in `TripCard` is a `variants()` recipe, and the caller picks its layout per breakpoint with `conditions={{ wide: { layout: "inline" } }}`. That compiles to a media query plus a `data-zyzz-condition-0-layout` attribute, with no JS. `progress` only accepts a `` `${number}%` `` string and reaches the CSS through a custom property. `progress: "50"` and `color: "#f00"` (no ` !custom`) both fail `tsc` (TS2322), kept as `@ts-expect-error` lines. The compiler rejects the raw color again at build time, so that line sits in `src/showcase/guards.ts`, which no page imports. Next only compiles imported modules, so `tsc` sees the file and the build doesn't. The guard covers values, not intent, since ` !custom` accepts any CSS value.
+
 ## Benchmarks
 
 <!-- bench:start -->
 
-Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.15.0, bun 1.3.13, Chromium 156.0.8078.4. Values are median (p95) of 10 runs. Raw data: `bench/results/`. `vanilla-extract` was measured 2026-10-16 in a separate run.
+Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.15.0, bun 1.3.13, Chromium 156.0.8078.4. Values are median (p95) of 10 runs. Raw data: `bench/results/`. `vanilla-extract` was measured 2026-10-16 in a separate run. `zyzz` was measured 2026-10-21 in a separate run.
 
 ### Build time (seconds, `bun run build`)
 
@@ -299,6 +349,7 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 | stylex          | 4.59 (4.98)       | 1.67 (1.71)   | 838 (859)                            |
 | panda           | 3.13 (3.41)       | 1.79 (1.88)   | 822 (841)                            |
 | vanilla-extract | 4.47 (5.18)       | 2.85 (2.94)   | 927 (940)                            |
+| zyzz            | 4.26 (5.13)       | 1.70 (1.76)   | 837 (861)                            |
 
 ### First-load bytes for `/` (brotli)
 
@@ -311,6 +362,7 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 | stylex          | 2.6 KB | 149.4 KB | +0.8 KB           | 3.9 KB |
 | panda           | 2.8 KB | 153.8 KB | +5.2 KB           | 3.8 KB |
 | vanilla-extract | 2.6 KB | 148.4 KB | -0.1 KB           | 3.4 KB |
+| zyzz            | 5.0 KB | 150.3 KB | +1.7 KB           | 4.7 KB |
 
 ### Browser cost for `/` (ms, Chromium, 4× CPU throttle)
 
@@ -323,15 +375,26 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 | stylex          | 0.6 (0.9)         | 3.4 (4.3)         | 22.6 (27.9) | 64.0 (72.0) | 64.0 (72.0) | 2.7 (3.8)           |
 | panda           | 0.8 (1.1)         | 4.0 (4.5)         | 23.8 (26.9) | 66.0 (76.0) | 66.0 (76.0) | 3.2 (3.8)           |
 | vanilla-extract | 0.6 (1.2)         | 3.5 (4.3)         | 23.2 (26.3) | 68.0 (68.0) | 68.0 (68.0) | 2.7 (3.9)           |
+| zyzz            | 0.6 (1.4)         | 3.6 (4.2)         | 22.4 (24.6) | 72.0 (76.0) | 72.0 (76.0) | 2.7 (3.6)           |
 
 <!-- bench:end -->
 
 ### Reading the numbers
 
-- **Bundle size barely separates them.** CSS is 2 to 4 KB everywhere, and roughly 149 KB of JS is the Next/React baseline. The JS deltas come from the one client component (`ThemeToggle`), which pulls in each library's runtime helper: `stylex.props` and yak (+0.8 KB), Linaria's `styled` (+2.2 KB), and Panda's `css()` and `cx` (+5.2 KB, because Panda computes class names at runtime). vanilla-extract adds nothing (−0.1 KB, within noise), because `ThemeToggle` only imports class-name strings. Server components ship no styling JS in any app. The more client components you style, the more these deltas matter.
-- **Tailwind ships the most CSS**, 3.7 KB against 2.2 to 2.8 KB for the rest. That's preflight plus one utility per value used.
+- **Bundle size barely separates them.** CSS is 2 to 4 KB everywhere, and roughly 149 KB of JS is the Next/React baseline. The JS deltas come from the one client component (`ThemeToggle`), which pulls in each library's runtime helper: `stylex.props` and yak (+0.8 KB), Linaria's `styled` (+2.2 KB), and Panda's `css()` and `cx` (+5.2 KB, because Panda computes class names at runtime). vanilla-extract adds nothing (−0.1 KB, within noise), because `ThemeToggle` only imports class-name strings. zyzz adds 1.7 KB, because `ThemeToggle` imports `appearance`, the theme controls, plus the small helpers that return the spread props. Server components ship no styling JS in any app. The more client components you style, the more these deltas matter.
+- **zyzz ships the most CSS and HTML.** It sends 5.0 KB of CSS and 4.7 KB of HTML (brotli), against 2.2 to 3.7 KB and 3.4 to 3.9 KB for the rest. Raw HTML is 34 KB, twice CSS Modules' 17 KB. There are three causes:
+  - Output is atomic by default, and many class names stay long and readable in production (`z-yldNHM-styles-card-p-2`).
+  - Every token is its own `.z-theme-theme{…}` rule.
+  - `cx` emits a merged copy of the rules it combines.
+
+  `cssOutput: "grouped"` was tried once and not kept. It only reached 4.7 KB of CSS and 4.4 KB of HTML.
+
+- **Tailwind ships the most CSS of the rest**, 3.7 KB against 2.2 to 2.8 KB for the others. That's preflight plus one utility per value used.
 - **The browser can't tell them apart.** Parse, style recalculation, layout, FCP and LCP all fall within noise. Between two full benchmark runs, the same app's FCP median moved by up to 14 ms (Panda measured 72, 80 and 66 ms across three runs), which is more than the gap between any two apps. The one repeat outlier is Tailwind's theme-toggle recalculation, 4.9 to 5.7 ms against about 3 ms elsewhere in every run, likely from the `:where([data-theme=light] *)` variant on the icons. That's real but tiny.
 - **Build time is the only meaningful difference.** Tailwind, CSS Modules, Panda and next-yak finish cold builds within 0.6 s of each other. Linaria costs about 1.1 s more (it executes style code in Node), and StyleX about 1.5 s more (Babel over every file). With a warm cache, the first six build in 1.7 to 2.1 s. vanilla-extract costs about 1.2 s more cold and is the slowest warm build at 2.9 s, with the highest peak memory (927 MB). Its loader evaluates every `.css.ts` file in Node, and the warm number suggests that work isn't cached between builds. It was measured a day after the others, so CSS Modules was re-timed the same day as a check: 3.44 s mean over 5 cold builds, close to the 3.23 s in the table.
+- **zyzz** sits with Linaria and vanilla-extract on cold builds (4.3 s) and with the fast group warm (1.7 s), and its peak memory (837 MB) is close to CSS Modules'. It was measured on 2026-10-21, with two same-day checks:
+  - CSS Modules: 3.01 s mean over 5 cold builds, and an FCP median of 64 ms on the updated trace script, both matching the table.
+  - zyzz: the first full run was disturbed by other work on the machine. It showed one 12.3 s cold build and an FCP of 92 ms. A clean re-run gave the table's numbers, FCP 72 ms, which is within run-to-run noise.
 
 ## Problems hit during setup
 
@@ -403,6 +466,26 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 - Biome's `useSortedKeys` sorts style objects alphabetically, not in the logical order `useSortedProperties` uses for CSS, and moves `:hover`, `@media` and `@container` to the top. It leaves computed keys such as `[media.md]` and `[media.lg]` alone, so the mobile-first order of the queries is kept.
 - `bun install` blocks the `@swc/core` postinstall the plugin pulls in. The build works without it.
 
+**zyzz**
+
+- Version 0.0.36 was published the day the app was added. Every release so far is a 0.0.x patch, and some of them carried breaking changes. The package takes 124 MB in `node_modules`, because it ships the Rust compiler as native binaries plus a WASM fallback.
+- zyzz tests against Next 16.3.5. On 16.4.0, `next dev` and `next build` worked on Turbopack with the `zyzz/next` wrapper, so no fallback was needed. The wrapper turns on `experimental.lightningCssFeatures` (it excludes `light-dark()` from lowering), and Next lists that under "Experiments".
+- The wrapper writes a `.zyzz/` cache folder into the app, which is gitignored.
+- `defineVars`' derive callback must take one named parameter. `({ color }) => …` passes `tsc` and then fails the build with "Derived variables require one named parameter and a literal return value". Values must be literal data or `vars.*` references, or the build fails with "Theme values must be literal data".
+- Token names win over everything else on a property that has tokens. A raw value there needs a ` !custom` suffix, even a keyword or zero, such as `"0px !custom"`, `"transparent !custom"`, `"1152px !custom"` and `"inherit !custom"` for `fontFamily`. The app has 25 of them. It's the right default for a design system, but most hits are a plain `0px`, and that gets old fast.
+- `{dark, light}` pairs only accept colors. `shadow-card` differs only in its color, so the shadow color is a pair and the mixin interpolates it: `` `0px 8px 24px ${vars.color.shadow} !custom` ``.
+- Base styles use `global()` from `zyzz/web`. Next only compiles imported modules, so the layout imports `@/theme/globals`. The built-in reset (`reset: true`) uses `em` and `lh`, so it isn't used.
+- Native theming doesn't use `data-theme`. `appearance.set()` puts a `z_scheme-light`, `z_scheme-dark` or `z_scheme-light-dark` class and an inline `color-scheme` on `<html>`, and saves `{"colorScheme":"light"}` under `localStorage.zyzz`. `script()` restores it before paint.
+- zyzz has no light/dark condition, so the Sun/Moon icons select those internal `z_scheme-*` class names. While the scheme is still `light dark`, they also need a `prefers-color-scheme` query.
+- The bench now pins Chromium to a dark color scheme. zyzz ignores `localStorage.theme`, so without that it loaded light.
+- The markup differs from the other apps in three ways:
+  - Buttons carry `data-variant` and `data-size` attributes.
+  - Responsive variant choices add `data-zyzz-condition-*` attributes.
+  - Production class names mix short hashes (`z_yldNHM0`) with long readable ones (`z-yldNHM-styles-card-p-2`).
+- `cx(focusRing(), styles.toggle())` compiles to its own precomputed group, with a copy of every rule from both styles. The CSS keeps the original toggle rules too, which nothing uses.
+- `style([surface, {…}])` copies declarations across files, so a selector that targets `surface`'s class won't match the card.
+- `Props.Variants<typeof styles.button>` includes zyzz's own `className`, `style`, `vars` and `conditions` props. Combining it with `ComponentProps<"button">` fails `tsc`, because zyzz's `style` type isn't React's `CSSProperties`. `Button` therefore takes `children` plus the variant props only.
+
 ## Recommendation
 
 See `RESULT.md` for the decision guide and my own take.
@@ -428,8 +511,11 @@ What works on 7, in all seven apps:
 | stylex          | 1.13 s                                | 0.20 s   |
 | panda           | 1.22 s                                | 0.24 s   |
 | vanilla-extract | not measured (added after the switch) | 0.20 s   |
+| zyzz            | not measured (added after the switch) | 0.74 s   |
 
 That's about 6 times faster. On an app this small it saves under a second per check. On a large codebase the same ratio matters a lot more.
+
+zyzz is the outlier at 0.74 s, about 5 times CSS Modules (0.15 s, re-timed the same way the same day). Its style types infer every token and value, and zyzz's own changelog lists type-check speed as ongoing work.
 
 What the switch cost:
 
@@ -527,6 +613,33 @@ Things to know:
 - Children are styled outside the object, with a `globalStyle` rule on `${parent} svg`. It works, but the rule sits away from the class it belongs to, which is the nesting the template-literal libraries do inline.
 - `unstable_turbopack` may change between plugin releases. Re-run lint, typecheck and build on every upgrade.
 
+### zyzz
+
+What's set up in `apps/zyzz`:
+
+| Need                                      | How                                                                                                                                                                                                            | Where                                                    |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| One import for the API, tokens and mixins | `src/theme/index.ts` re-exports `style`, `variants`, `vars`, `appearance`, `script`, `surface` and `focusRing`. The compiler follows the barrel and the `@/` alias. `cx` and the `Props` type come from `zyzz` | `src/theme/index.ts`                                     |
+| Same token names as the other apps        | Tokens are the shared names (`accent`, `textSecondary`, `6`, `headingLarge`). The variables are `--z-color-accent`, `--z-spacing-6`, and the `--z-` prefix is fixed                                            | `src/theme/zyzz.config.ts`                               |
+| Token and value typos fail `tsc`          | Token-mapped properties only accept token names, so `color: "acent"` or a raw `"#f00"` is a type error, and the compiler rejects it again at build time. ` !custom` opts out                                   | all components                                           |
+| Typed variants                            | `Props.Variants<typeof styles.button>` types `variant` and `size`, plus `conditions` for per-breakpoint choices                                                                                                | `src/components/Button.tsx`, `src/showcase/TripCard.tsx` |
+| Styles next to the component              | A `namespace styles` block under each component, the layout zyzz's docs use. Biome accepts it, because `noNamespace` isn't in the recommended set                                                              | all components                                           |
+| Theme switching                           | `script()` in `<head>`, and `appearance.get()` / `appearance.set()` in `ThemeToggle`                                                                                                                           | `src/app/layout.tsx`, `src/components/ThemeToggle.tsx`   |
+| Global styles                             | `global()` from `zyzz/web`, imported once by the layout. The app has no `.css` files                                                                                                                           | `src/theme/globals.ts`                                   |
+
+Things to know:
+
+- zyzz's linting ships as an oxlint plugin (`jsPlugins: [{ name: "zyzz", specifier: "zyzz/oxlint" }]`). Its rules:
+  - `valid-styles`
+  - `no-conflicting-props`, which flags two style spreads on one element (the second replaces the first's `className`)
+  - `no-unused`, for unused members of `namespace styles`
+  - `use-logical-properties` and `restricted-properties`, both opt-in
+
+  The oxlint JS plugin API is labelled alpha. This repo stays on Biome, which has no zyzz rules, so only `tsc` and the build check styles here. A doubled spread isn't caught.
+
+- No editor extension exists or is needed, since completion comes from TypeScript. Docs for agents are at `zyzz.style/llms.txt`.
+- The same `defineConfig` also compiles for React Native (`zyzz/react-native`). That's untested here, and upstream calls native rendering a preview.
+
 ### Panda
 
 The +5.2 KB in the bundle table is Panda's class-name runtime. The CSS is generated at build time, but `css()`, `cx`, `cva`, config recipes, patterns and `styled-system/jsx` are still functions that turn style objects into class strings when they run. Where they run decides the cost:
@@ -561,3 +674,5 @@ Runtime values, documented in Panda's "Dynamic styling" page: Panda can't extrac
 - [Linear for StyleX](https://linear.app/now/styling-linear-for-the-future-stylex)
 - [Linaria vs Tailwind](https://swoodpartners.medium.com/css-in-js-en-2026-tailwind-4-ou-linaria-99d30052d529)
 - [Github moving to CSS Modules](https://x.com/github/status/2111156078293737607)
+- [Benchmarks](https://jantimon.github.io/css-in-js-bench/)
+- [zyzz benchmarks](https://zyzz.style/docs/introduction/benchmarks) and [comparisons](https://zyzz.style/docs/introduction/comparisons), published by zyzz itself
