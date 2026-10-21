@@ -40,7 +40,7 @@ Before running this experiment, we're going to establish some requirements.
 
 ## Experiment
 
-The same Next.js landing page ("Visit Mars") built seven times, once per styling approach. All with light or zero runtime work.
+The same Next.js landing page ("Visit Mars") built eight times, once per styling approach. All with light or zero runtime work.
 
 | Framework       | Reason                                                         |
 | --------------- | -------------------------------------------------------------- |
@@ -51,6 +51,7 @@ The same Next.js landing page ("Visit Mars") built seven times, once per styling
 | Linaria         | styled-components popular drop-in replacement (12.4K stars)    |
 | next-yak        | styled-component replacement with SWC + Turbopack support      |
 | vanilla-extract | Test the “CSS Modules-in-TypeScript” statement                 |
+| zyzz            | wevm's new typed styling library (web + React Native)          |
 
 Others that have been considered
 
@@ -218,17 +219,47 @@ Some per-solution findings.
 | (Co)Location | Separate `.css.ts` files for styling and components, like CSS Modules |
 | Build        | Slowest warm build (2.9 s) and highest peak memory                    |
 
+### zyzz
+
+| Key         | Advantage                                                                                                                   |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Type-safety | Values must be tokens; variants and dynamic values (`${number}%`) are typed. The compiler checks values again at build time |
+| Nesting     | Children are styled inside the same object (`selectors: { "& svg" }`), unlike vanilla-extract and StyleX                    |
+| Tokens      | `@media >=md` and `@container card >=cardWide` aliases, no literals                                                         |
+| Imports     | One `@/theme` barrel for the API, tokens and mixins                                                                         |
+| Theming     | `light-dark()` color pairs, plus a built-in no-flash script and persistence                                                 |
+
+| Key      | Disadvantage                                                                                                                 |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Syntax   | Object syntax, and ` !custom` on every raw value, even `0px` (25 in this small app)                                          |
+| Size     | Most CSS (5.0 KB) and HTML (2× raw) of all apps, from long atomic class names, one rule per token and `cx` duplicating rules |
+| Theming  | No `data-theme`. Switches that aren't colors rely on internal `z_scheme-*` classes                                           |
+| Linting  | Rules only exist as an oxlint plugin (alpha JS plugin API). Biome checks nothing zyzz-specific                               |
+| Maturity | 0.0.x, published the day it was tested, breaking changes in patch releases                                                   |
+
+| Key       | Temporary / minor inconvenience                                                                          |
+| --------- | -------------------------------------------------------------------------------------------------------- |
+| Typecheck | `tsc` 0.74 s vs 0.13–0.24 s for the others                                                               |
+| Types     | `Props.Variants` clashes with `ComponentProps<"button">`, so `Button` only takes variants and `children` |
+| Setup     | 124 MB package. Next 16.4 untested upstream, but `dev` and `build` work on Turbopack                     |
+
+| Key          | Neutral or informational                                                                   |
+| ------------ | ------------------------------------------------------------------------------------------ |
+| (Co)Location | 🤝 Styles in the component file (`namespace styles`), can move to a sibling `*.styles.ts`   |
+| Build        | 4.3 s cold (with Linaria and vanilla-extract), 1.7 s warm; +1.7 KB JS in client components |
+| Community    | wevm (viem, wagmi), 4 human contributors so far                                            |
+
 ### Questions
 
 Each answer only removes options. Answer them in any order, and whatever is left is your shortlist.
 
 > [!CAUTION]
-> Biome-only setups (as in every app here): Tailwind's unknown classes are only flagged by IntelliSense, and StyleX's value checks and key sorting live in `@stylexjs/eslint-plugin`. Both are caught in the editor (IntelliSense, TypeScript types), not by Biome in CI. ESLint plugins exist for both if you run ESLint next to Biome.
+> Biome-only setups (as in every app here): Tailwind's unknown classes are only flagged by IntelliSense, StyleX's value checks and key sorting live in `@stylexjs/eslint-plugin`, and zyzz's rules ship only as an oxlint plugin. All three are caught in the editor (IntelliSense, TypeScript types) or by `tsc`, not by Biome in CI. Tailwind and StyleX have ESLint plugins, and zyzz needs oxlint, if you run either next to Biome.
 
 #### Q: Which syntax would you reject? (pick any)
 
 - **A** (Native CSS / template literals): drop css-modules, next-yak, linaria
-- **B** (Object syntax): drop stylex, vanilla-extract, panda[^panda]
+- **B** (Object syntax): drop stylex, vanilla-extract, zyzz, panda[^panda]
 - **C** (Custom syntax): drop tailwind
 
 [^panda]: Panda's own keys (`px`, `_hover`, `{ base, md }`) are mostly optional. `&:hover` and raw `@media` work too, but token breakpoints need its `md` key.
@@ -250,7 +281,7 @@ Each answer only removes options. Answer them in any order, and whatever is left
 
 #### Q: How large and active a community do you need?
 
-Measured 2026-10-18. Contributors are distinct human commit authors (bots excluded) on the default branch over the last 12 months. Commit counts depend on merge style (squash vs merge commits), so compare contributors and releases first. CSS Modules is part of the platform.
+Measured 2026-10-18 (zyzz on 2026-10-21). Contributors are distinct human commit authors (bots excluded) on the default branch over the last 12 months. Commit counts depend on merge style (squash vs merge commits), so compare contributors and releases first. CSS Modules is part of the platform.
 
 | Library         | npm/week | Stars                       | Contributors (12 mo) | Commits 2025 / 2026 | Stable releases 2025 / 2026 | Latest release |
 | --------------- | -------- | --------------------------- | -------------------- | ------------------- | --------------------------- | -------------- |
@@ -261,15 +292,16 @@ Measured 2026-10-18. Contributors are distinct human commit authors (bots exclud
 | ↳ `wyw-in-js`   | 109K     | 0.3K                        | 14                   | 39 / 449            | 4 / 31                      | 2026-10-15     |
 | panda           | 291K     | 6.2K                        | 22                   | 301 / 975           | 28 / 21                     | 2026-10-09     |
 | next-yak        | 7.8K     | 0.6K                        | 10                   | 141 / 143           | 24 / 15                     | 2026-09-28     |
+| zyzz            | 4.4K     | 66                          | 4                    | 0 / 494             | 0 / 0 (33 × 0.0.x)          | 2026-10-21     |
 
-- **Large and active** (≥ 1M downloads/week and ≥ 20 contributors in 12 months): drop panda, linaria, next-yak
-- **Actively maintained, any size** (a stable release in the last 6 months and ≥ 10 contributors in 12 months): drop linaria. Its engine `wyw-in-js` is busy, but the `@linaria/*` packages had 12 commits and 1 release in 2025, and 4 contributors in the last year
+- **Large and active** (≥ 1M downloads/week and ≥ 20 contributors in 12 months): drop panda, linaria, next-yak, zyzz
+- **Actively maintained, any size** (a stable release in the last 6 months and ≥ 10 contributors in 12 months): drop linaria, zyzz. Linaria's engine `wyw-in-js` is busy, but the `@linaria/*` packages had 12 commits and 1 release in 2025, and 4 contributors in the last year
 - **Don't care**: drop nothing
 
 #### Q: Where should styles live?
 
 - **In the component file**: drop css-modules, vanilla-extract (both require a separate file)
-- **Separable from markup**: drop tailwind (stylex, panda, linaria and next-yak can move styles to a sibling `*.styles.ts`)
+- **Separable from markup**: drop tailwind (stylex, panda, linaria, next-yak and zyzz can move styles to a sibling `*.styles.ts`)
 - **Don't care**: drop nothing
 
 ## My view
