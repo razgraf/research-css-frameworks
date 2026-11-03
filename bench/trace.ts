@@ -58,7 +58,7 @@ async function measureRun(browser: Browser, url: string) {
 }
 
 const selected = (process.argv[2] ? [process.argv[2]] : apps) as App[];
-const browser = await chromium.launch();
+const browser = await chromium.launch({ channel: "chrome", chromiumSandbox: true });
 for (const [index, app] of selected.entries()) {
   const port = 3300 + index;
   const server = await startServer(app, port);
