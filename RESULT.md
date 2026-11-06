@@ -229,13 +229,13 @@ Some per-solution findings.
 | Imports     | One `@/theme` barrel for the API, tokens and mixins                                                                         |
 | Theming     | `light-dark()` color pairs, plus a built-in no-flash script and persistence                                                 |
 
-| Key      | Disadvantage                                                                                                                 |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Syntax   | Object syntax, and ` !custom` on every raw value, even `0px` (25 in this small app)                                          |
-| Size     | Most CSS (5.0 KB) and HTML (2× raw) of all apps, from long atomic class names, one rule per token and `cx` duplicating rules |
-| Theming  | No `data-theme`. Switches that aren't colors rely on internal `z_scheme-*` classes                                           |
-| Linting  | Rules only exist as an oxlint plugin (alpha JS plugin API). Biome checks nothing zyzz-specific                               |
-| Maturity | 0.0.x, published the day it was tested, breaking changes in patch releases                                                   |
+| Key      | Disadvantage                                                                                                                                   |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Syntax   | Object syntax, and ` !custom` on every raw value, even `0px` (25 in this small app, although this is a good way to enforce this best practice) |
+| Size     | Most CSS (5.0 KB) and HTML (2× raw) of all apps, from long atomic class names, one rule per token and `cx` duplicating rules                   |
+| Theming  | No `data-theme`. Switches that aren't colors rely on internal `z_scheme-*` classes                                                             |
+| Linting  | Rules only exist as an oxlint plugin (alpha JS plugin API). Biome checks nothing zyzz-specific                                                 |
+| Maturity | 0.0.x, published the day it was tested, breaking changes in patch releases                                                                     |
 
 | Key       | Temporary / minor inconvenience                                                                          |
 | --------- | -------------------------------------------------------------------------------------------------------- |
@@ -245,7 +245,7 @@ Some per-solution findings.
 
 | Key          | Neutral or informational                                                                   |
 | ------------ | ------------------------------------------------------------------------------------------ |
-| (Co)Location | 🤝 Styles in the component file (`namespace styles`), can move to a sibling `*.styles.ts`   |
+| (Co)Location | 🤝 Styles in the component file (`namespace styles`), can move to a sibling `*.styles.ts`  |
 | Build        | 4.3 s cold (with Linaria and vanilla-extract), 1.7 s warm; +1.7 KB JS in client components |
 | Community    | wevm (viem, wagmi), 4 human contributors so far                                            |
 
@@ -283,19 +283,19 @@ Each answer only removes options. Answer them in any order, and whatever is left
 
 Measured 2026-10-18 (zyzz on 2026-10-21). Contributors are distinct human commit authors (bots excluded) on the default branch over the last 12 months. Commit counts depend on merge style (squash vs merge commits), so compare contributors and releases first. CSS Modules is part of the platform.
 
-| Library         | npm/week | Stars                       | Contributors (12 mo) | Commits 2025 / 2026 | Stable releases 2025 / 2026 | Latest release |
-| --------------- | -------- | --------------------------- | -------------------- | ------------------- | --------------------------- | -------------- |
-| tailwind        | 85.3M    | 97.9K                       | 66                   | 712 / 300           | 39 / 9                      | 2026-07-16     |
-| vanilla-extract | 1.61M    | 10.4K                       | 23                   | 73 / 78             | 6 / 8                       | 2026-10-08     |
-| stylex          | 1.18M    | 10.4K                       | 55                   | 427 / 240           | 25 / 7                      | 2026-09-15     |
-| linaria         | 293K     | 12.4K                       | 4                    | 12 / 51             | 1 / 6                       | 2026-08-10     |
-| ↳ `wyw-in-js`   | 109K     | 0.3K                        | 14                   | 39 / 449            | 4 / 31                      | 2026-10-15     |
-| panda           | 291K     | 6.2K                        | 22                   | 301 / 975           | 28 / 21                     | 2026-10-09     |
-| next-yak        | 7.8K     | 0.6K                        | 10                   | 141 / 143           | 24 / 15                     | 2026-09-28     |
-| zyzz            | 4.4K     | 66                          | 4                    | 0 / 494             | 0 / 0 (33 × 0.0.x)          | 2026-10-21     |
+| Library         | npm/week | Stars | Contributors (12 mo) | Commits 2025 / 2026 | Stable releases 2025 / 2026 | Latest release |
+| --------------- | -------- | ----- | -------------------- | ------------------- | --------------------------- | -------------- |
+| tailwind        | 85.3M    | 97.9K | 66                   | 712 / 300           | 39 / 9                      | 2026-07-16     |
+| vanilla-extract | 1.61M    | 10.4K | 23                   | 73 / 78             | 6 / 8                       | 2026-10-08     |
+| stylex          | 1.18M    | 10.4K | 55                   | 427 / 240           | 25 / 7                      | 2026-09-15     |
+| linaria         | 293K     | 12.4K | 4                    | 12 / 51             | 1 / 6                       | 2026-08-10     |
+| ↳ `wyw-in-js`   | 109K     | 0.3K  | 14                   | 39 / 449            | 4 / 31                      | 2026-10-15     |
+| panda           | 291K     | 6.2K  | 22                   | 301 / 975           | 28 / 21                     | 2026-10-09     |
+| next-yak        | 7.8K     | 0.6K  | 10                   | 141 / 143           | 24 / 15                     | 2026-09-28     |
+| zyzz            | 4.4K     | 66    | 4                    | 0 / 494             | 0 / 0 (33 × 0.0.x)          | 2026-10-21     |
 
 - **Large and active** (≥ 1M downloads/week and ≥ 20 contributors in 12 months): drop panda, linaria, next-yak, zyzz
-- **Actively maintained, any size** (a stable release in the last 6 months and ≥ 10 contributors in 12 months): drop linaria, zyzz. Linaria's engine `wyw-in-js` is busy, but the `@linaria/*` packages had 12 commits and 1 release in 2025, and 4 contributors in the last year
+- **Actively maintained, any size** (a stable release in the last 6 months and ≥ 10 contributors in 12 months): drop linaria, zyzz (strong team tho). Linaria's engine `wyw-in-js` is busy, but the `@linaria/*` packages had 12 commits and 1 release in 2025, and 4 contributors in the last year
 - **Don't care**: drop nothing
 
 #### Q: Where should styles live?
