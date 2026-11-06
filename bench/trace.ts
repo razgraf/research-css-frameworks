@@ -18,7 +18,11 @@ function sum(trace: Buffer) {
 }
 
 async function openPage(browser: Browser, url: string): Promise<Page> {
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  // zyzz ignores `localStorage.theme` and follows the OS until toggled, so pin the OS to dark too.
+  const context = await browser.newContext({
+    colorScheme: "dark",
+    viewport: { width: 1280, height: 900 },
+  });
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
@@ -54,7 +58,7 @@ async function measureRun(browser: Browser, url: string) {
 }
 
 const selected = (process.argv[2] ? [process.argv[2]] : apps) as App[];
-const browser = await chromium.launch();
+const browser = await chromium.launch({ channel: "chrome", chromiumSandbox: true });
 for (const [index, app] of selected.entries()) {
   const port = 3300 + index;
   const server = await startServer(app, port);

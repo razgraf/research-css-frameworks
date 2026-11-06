@@ -3,11 +3,11 @@
 > Source: `PRD.md` and the research notes (`~/Downloads/CSS Frameworks.pdf`).
 
 ## Context
-Moving off styled-components. Goal is to pick a zero-runtime(ish) replacement by building the **same** Mars landing page in 7 isolated Next.js apps, then comparing DX (tokens, mixins, variants, MQ, theming, Biome, autocomplete, type-safety) and perf (bytes, build time, browser style cost).
+Moving off styled-components. Goal is to pick a zero-runtime(ish) replacement by building the **same** Mars landing page in 8 isolated Next.js apps, then comparing DX (tokens, mixins, variants, MQ, theming, Biome, autocomplete, type-safety) and perf (bytes, build time, browser style cost).
 Biases from the notes, so the report addresses them head-on: prefers template literals; dislikes object syntax (StyleX, Panda) and Tailwind class soup; wants nested rules and MQs co-located in the wrapper.
 
 ## Decisions (from interview)
-- Apps: `apps/{css-modules,tailwind,next-yak,linaria,stylex,panda,vanilla-extract}` (vanilla-extract added 2026-10-16). **Fully isolated.** Nothing shared, each app has its own lockfile and configs.
+- Apps: `apps/{css-modules,tailwind,next-yak,linaria,stylex,panda,vanilla-extract,zyzz}` (vanilla-extract added 2026-10-16, zyzz 2026-10-21). **Fully isolated.** Nothing shared, each app has its own lockfile and configs.
 - Next `16.4.0`, React 19, App Router, TS strict, bun as package manager. Scripts run via `bun run` (Node ≥22 executes `next`, no `bun --bun`). **Exact version pins** (no `^`), see Pinned versions.
 - Turbopack everywhere. Fall back to webpack per app only if it's broken, and log that in the Gotchas.
 - **Fallback policy**: when a spike or setup fails, take the first fallback that keeps the app's authoring syntax unchanged (e.g. webpack for one app, `postcss-custom-media` → alternative plugin, `.ts` → `*.yak.ts`). Log every fallback in the README gotchas. Don't stop to ask unless no syntax-preserving fallback exists.
@@ -40,7 +40,7 @@ Use these exact versions in every app that needs them. Don't upgrade mid-project
 | @pandacss/dev / @pandacss/preset-base | 2.2.0 | postcss-custom-media | 12.0.3 |
 | @csstools/postcss-global-data | 4.0.0 | @vanilla-extract/css | 1.21.3 |
 | @vanilla-extract/recipes | 0.5.7 | @vanilla-extract/next-plugin | 2.5.2 |
-| playwright (bench) | 1.64.1 | | |
+| zyzz | 0.0.36 | playwright (bench) | 1.64.1 |
 
 Toolchain: Node 24.15.0, bun 1.3.13, hyperfine (brew).
 TypeScript note: 7.0.2 is the native Go compiler. Next 16.4 builds and type-checks with it. It can't load tsserver plugins, so `typescript-plugin-css-modules` was removed; see README "TypeScript 7".
@@ -137,9 +137,10 @@ Scripts: `dev`, `build`, `start`, `lint` (`biome check`), `typecheck` (`tsc --no
 | **linaria** | same as yak (globals.css vars + typed refs) | TS constants interpolated (wyw evaluates them at build time) | Plain string/template constant interpolated. Note: interpolating a `css` class embeds a selector, not rules. Verify and document | `&[data-variant="secondary"]` / `data-size` attribute selectors. Linaria prop interpolation can only set values, not conditional blocks. Document | `@wyw-in-js/nextjs` `withWyw()`; gitignore `*.wyw-in-js.module.css`; Biome embed flag |
 | **stylex** 0.19 | `theme/tokens.stylex.ts` `defineVars` with `--`-prefixed keys (stable names), light overrides in `globals.css` under `[data-theme=light]` | `theme/breakpoints.stylex.ts` `defineConsts` with **overlapping mobile-first `min-width`** queries (same as the other apps) → `[bp.md]: …`. Ordering isn't guaranteed (`enableMediaQueryOrder` doesn't cover `defineConsts`); the spike checks it, and the README logs the risk | Shared `stylex.create` objects composed via `stylex.props(mixins.surface, styles.card)` | `stylex.props(styles.base, variants[variant], sizes[size])` | `babel.config.js` + `@stylexjs/babel-plugin` + `@stylexjs/postcss-plugin`, `@stylex;` in globals. **Not** `@stylexjs/nextjs-plugin` (deprecated) |
 | **panda** v2.2 | `panda.config.ts` `theme.tokens` + `semanticTokens {base: dark, _light: light}`, condition `light: '[data-theme=light] &'`; only `@pandacss/preset-base` (no default tokens) | `theme.breakpoints` | `layerStyles.surface`; `focusRing` via `css.raw()` composition | config `recipes.button` (typed variants) | `panda init --postcss`, `prepare: panda codegen`, gitignore `styled-system`; object syntax (template literals were removed in v2, explained in README) |
+| **zyzz** 0.0.36 | `theme/zyzz.config.ts` `defineVars` primitives + semantic `{dark, light}` pairs (derive callback) → `light-dark()`; `vars({ colorScheme: "light dark" })` on `<html>`, `appearance.set()` + `script()` (native, no `data-theme`) | `breakpoint` tokens → `'@media >=md'`; `container.cardWide` + `containerNames` → `'@container card >=cardWide'` | `style([surface, {…}])` (declarations copied), `cx(focusRing(), …)` | `variants()` typed with `Props.Variants`, axes render as `data-*` | `zyzz/next` wrapper (Turbopack + webpack); styles in a `namespace styles` block per component; barrel `@/theme`; `global()` from `zyzz/web`; gitignore `.zyzz`; oxlint plugin documented, not used |
 | **vanilla-extract** 1.21 | `theme/tokens.css.ts` `createGlobalThemeContract` (stable `--color-accent` names via a path→kebab map) + `createGlobalTheme(":root")`; light via `assignVars` in `globalStyle(':root[data-theme="light"]')` | `theme/breakpoints.css.ts` TS constants as `'@media'` keys; `createContainer()` + `container.cardWide` | `style([surface, {…}])` composition (emits both classes) | `@vanilla-extract/recipes` `recipe()`, props typed with `RecipeVariants` | `createVanillaExtractPlugin({ unstable_turbopack: { mode: "on" } })`; styles in `*.css.ts` next to components; barrel `@/theme`; Biome `useSortedKeys` on `*.css.ts` |
 
-VSCode recommendations (per app `.vscode/extensions.json`): all apps get `biomejs.biome`. Tailwind: `bradlc.vscode-tailwindcss`. yak/linaria: `styled-components.vscode-styled-components`. css-modules: `clinyong.vscode-css-modules`. panda: `chakra-ui.panda-css-vscode` (v2 compat unverified, document). stylex: none (TS types only). vanilla-extract: none (TS types only).
+VSCode recommendations (per app `.vscode/extensions.json`): all apps get `biomejs.biome`. Tailwind: `bradlc.vscode-tailwindcss`. yak/linaria: `styled-components.vscode-styled-components`. css-modules: `clinyong.vscode-css-modules`. panda: `chakra-ui.panda-css-vscode` (v2 compat unverified, document). stylex: none (TS types only). vanilla-extract: none (TS types only). zyzz: none (TS types only).
 
 Biome (per app `biome.json`): recommended lint + formatter. Ignore `.next`, `styled-system`, `*.wyw-in-js.module.css`, `*.module.css.d.ts`. Record which template-literal blocks get formatted vs skipped (anything with `${}` is skipped).
 
@@ -158,6 +159,7 @@ Each app may add **one** framework-specific piece that shows something the libra
 | **tailwind** | Constrained design system + state variants without JS | `@theme { --color-*: initial; … }` removes default colors, so only project tokens exist and `bg-red-500` produces nothing. `TripCard` list items use `group`/`group-hover:`, `data-[selected=true]:`, `has-[:focus-visible]:` and `peer` to show selection and focus purely in markup. |
 | **css-modules** | Platform-native CSS, zero tooling lock-in | `TripCard` uses `:has()` (the card highlights when a list item is hovered or focused), `@scope` to bound list styles, `@layer` ordering, and a style query (`@container style(--featured: true)`) with no build-step features. Browser support for each is noted. |
 | **panda** | Typed multi-part recipes + strict tokens | `TripCard` as an `sva` slot recipe (`root`, `title`, `list`, `item`, `footer`) with a `tone: "default" \| "featured"` variant. `strictTokens: true` makes `css({ color: "#f00" })` a type error, so only tokens type-check. |
+| **zyzz** | Typed values + responsive variants | `TripCard` countdown is a `variants()` recipe whose `layout` the caller switches per breakpoint with `conditions={{ wide: { layout: "inline" } }}` (compiled to a media query, no JS). `progress` is a typed `${number}%` dynamic value bound through a custom property. `@ts-expect-error` lines prove `"50"` and a raw `#f00` fail `tsc`. |
 | **vanilla-extract** | Typed theme contracts | `featured` is `createTheme(vars.color, tokens)`, a scoped class that re-skins the unchanged `Card` through the same variables. Leaving out a key of the contract is a `tsc` error (kept as `@ts-expect-error`) and also throws at build time. |
 
 ## Bench (`bench/`, own package.json: Playwright 1.64, hyperfine via brew)
@@ -191,6 +193,7 @@ Per app: `bun run lint && bun run typecheck && bun run build`, then `next start`
 
 - vanilla-extract added after the original six, measured in a separate bench run (same machine). Turbopack needs `unstable_turbopack.mode: "on"`.
 - css-modules: `typed-css-modules` (generated `.d.ts` for class names) was removed to avoid the generation step. Misspelled class names no longer fail `tsc`; `clinyong.vscode-css-modules` provides completion and go to definition.
+- zyzz added 2026-10-21 (8th app), measured in a separate bench run. Uses zyzz's native theming (`appearance` + `script()`, classes and inline `color-scheme` on `<html>`, `localStorage.zyzz`) instead of `data-theme`, so `bench/trace.ts` now also pins Chromium's `colorScheme` to dark (a no-op for the other apps, whose stored `theme` wins). Buttons render `data-variant`/`data-size` attributes. The raw-color `@ts-expect-error` guard lives in an unimported `src/showcase/guards.ts`, because the zyzz compiler also rejects it at build time.
 
 ## Unresolved questions
 - None. StyleX uses overlapping `min-width` constants so all codebases look the same; if the spike shows wrong ordering, fall back to non-overlapping ranges in StyleX only and log it.

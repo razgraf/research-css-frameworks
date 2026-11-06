@@ -1,0 +1,33 @@
+{
+  "app": "zyzz",
+  "unit": "bytes",
+  "firstLoad": {
+    "html": {
+      "raw": 34026,
+      "gzip": 5688,
+      "brotli": 4835
+    },
+    "css": {
+      "raw": 19341,
+      "gzip": 5932,
+      "brotli": 5074
+    },
+    "js": {
+      "raw": 580008,
+      "gzip": 178327,
+      "brotli": 153897
+    }
+  },
+  "total": {
+    "css": {
+      "raw": 21521,
+      "gzip": 6722,
+      "brotli": 5727
+    },
+    "js": {
+      "raw": 582519,
+      "gzip": 179533,
+      "brotli": 154988
+    }
+  }
+}

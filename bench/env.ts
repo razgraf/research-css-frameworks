@@ -3,7 +3,7 @@ import os from "node:os";
 import { chromium } from "playwright";
 import { writeResult } from "./lib.ts";
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({ channel: "chrome", chromiumSandbox: true });
 
 writeResult("env", {
   os: `${os.type()} ${os.release()}`,
