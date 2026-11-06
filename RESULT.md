@@ -49,7 +49,7 @@ The same Next.js landing page ("Visit Mars") built eight times, once per styling
 | StyleX          | Built for AI and projects/teams at scale (Linear, Polar, Meta) |
 | Panda           | CSS-in-JS, one of the popular picks (6K stars)                 |
 | Linaria         | styled-components popular drop-in replacement (12.4K stars)    |
-| next-yak        | styled-component replacement with SWC + Turbopack support      |
+| yak (next-yak)  | styled-component replacement with SWC + Turbopack support      |
 | vanilla-extract | Test the “CSS Modules-in-TypeScript” statement                 |
 | zyzz            | wevm's new typed styling library (web + React Native)          |
 
@@ -69,12 +69,12 @@ Some per-solution findings.
 
 ### CSS Modules
 
-| Key     | Advantage                                                                                                 |
-| ------- | --------------------------------------------------------------------------------------------------------- |
-| Syntax  | Native CSS                                                                                                |
-| Nesting | Native nesting, plus platform features like `@scope`, `:has()` and container style queries                |
-| Linting | Biome lints and formats it fully, including property order and `noDescendingSpecificity`                  |
-| Lock-in | None. It's the platform, and the fallback for most other options (next-yak compiles to `.yak.module.css`) |
+| Key     | Advantage                                                                                                       |
+| ------- | --------------------------------------------------------------------------------------------------------------- |
+| Syntax  | Native CSS                                                                                                      |
+| Nesting | Native nesting, plus platform features like `@scope`, `:has()` and container style queries                      |
+| Linting | Biome lints and formats it fully, including property order and `noDescendingSpecificity`                        |
+| Lock-in | None. It's the platform, and the fallback for most other options (yak (next-yak) compiles to `.yak.module.css`) |
 
 | Key           | Disadvantage                                                                                                                                  |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,7 +172,7 @@ Some per-solution findings.
 | Build     | About 1 s slower cold build than CSS Modules                                                                               |
 | Imports   | Tokens, breakpoints and mixins can come from one `@/theme` barrel (tested, identical output). The app uses three imports   |
 
-### next-yak
+### yak (next-yak)
 
 | Key    | Advantage                                                                                                                   |
 | ------ | --------------------------------------------------------------------------------------------------------------------------- |
@@ -185,10 +185,14 @@ Some per-solution findings.
 | Linting    | Biome skips formatting any template that contains `${}`                                       |
 | Formatting | Styled-components rule sorting relied on ESLint/Stylelint plugins, which are outdated         |
 
-| Key     | Temporary / minor inconvenience                                                                                                                                   |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Imports | The `${theme => …}` import reverts to **runtime**: a function call per interpolation, inline `style="--x: …"`, larger HTML, and a React re-render on theme switch |
-| Tokens  | Declared twice (CSS variables and TS refs). The constant parser only reads identifier keys and no `as const`, so `spacing.s8` instead of `spacing[8]`             |
+> [!IMPORTANT]
+>
+> As discussed with one of the core maintainers of yak, they are working with the community on an up to date extension 🙌 Biome is also on the list of considerations.
+
+| Key     | Temporary / minor inconvenience                                                                                                                                                                                                                                                             |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Imports | Reading the theme via `${({ theme }) => …}` keeps the CSS static but moves the values to render time: a function call per interpolation, inline style="--x: …" on each element, and a re-render (client) or server refresh (RSC) on theme switch. Static token imports avoid this entirely. |
+| Tokens  | Declared twice (CSS variables and TS refs). The constant parser only reads identifier keys and no `as const`, so `spacing.s8` instead of `spacing[8]`                                                                                                                                       |
 
 | Key       | Neutral or informational                                                                                                 |
 | --------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -258,7 +262,7 @@ Each answer only removes options. Answer them in any order, and whatever is left
 
 #### Q: Which syntax would you reject? (pick any)
 
-- **A** (Native CSS / template literals): drop css-modules, next-yak, linaria
+- **A** (Native CSS / template literals): drop css-modules, yak (next-yak), linaria
 - **B** (Object syntax): drop stylex, vanilla-extract, zyzz, panda[^panda]
 - **C** (Custom syntax): drop tailwind
 
@@ -266,13 +270,13 @@ Each answer only removes options. Answer them in any order, and whatever is left
 
 #### Q: Are you migrating a styled-components codebase?
 
-- **Yes**: keep only linaria and next-yak. next-yak ports `styled`, `css` mixins and prop variants as-is, while linaria turns conditional variants into data attributes
+- **Yes**: keep only linaria and yak (next-yak). yak ports `styled`, `css` mixins and prop variants as-is, while linaria turns conditional variants into data attributes
 - **No**: drop nothing
 
 #### Q: Is styled-components syntax worth degraded syntax highlighting, formatting and autocomplete?
 
 - **Yes**: drop nothing
-- **No**: drop linaria, next-yak. Highlighting and autocomplete rely on a styled-components extension last updated in 2023, Biome skips formatting templates that contain `${}`, and rule sorting relied on outdated ESLint/Stylelint plugins
+- **No**: drop linaria, yak (next-yak). Highlighting and autocomplete rely on a styled-components extension last updated in 2023, Biome skips formatting templates that contain `${}`, and rule sorting relied on outdated ESLint/Stylelint plugins
 
 #### Q: Must the library, tokens, breakpoints and mixins come from a single import?
 
@@ -291,17 +295,17 @@ Measured 2026-10-18 (zyzz on 2026-10-21). Contributors are distinct human commit
 | linaria         | 293K     | 12.4K | 4                    | 12 / 51             | 1 / 6                       | 2026-08-10     |
 | ↳ `wyw-in-js`   | 109K     | 0.3K  | 14                   | 39 / 449            | 4 / 31                      | 2026-10-15     |
 | panda           | 291K     | 6.2K  | 22                   | 301 / 975           | 28 / 21                     | 2026-10-09     |
-| next-yak        | 7.8K     | 0.6K  | 10                   | 141 / 143           | 24 / 15                     | 2026-09-28     |
+| yak (next-yak)  | 7.8K     | 0.6K  | 10                   | 141 / 143           | 24 / 15                     | 2026-09-28     |
 | zyzz            | 4.4K     | 66    | 4                    | 0 / 494             | 0 / 0 (33 × 0.0.x)          | 2026-10-21     |
 
-- **Large and active** (≥ 1M downloads/week and ≥ 20 contributors in 12 months): drop panda, linaria, next-yak, zyzz
+- **Large and active** (≥ 1M downloads/week and ≥ 20 contributors in 12 months): drop panda, linaria, yak (next-yak), zyzz
 - **Actively maintained, any size** (a stable release in the last 6 months and ≥ 10 contributors in 12 months): drop linaria, zyzz (strong team tho). Linaria's engine `wyw-in-js` is busy, but the `@linaria/*` packages had 12 commits and 1 release in 2025, and 4 contributors in the last year
 - **Don't care**: drop nothing
 
 #### Q: Where should styles live?
 
 - **In the component file**: drop css-modules, vanilla-extract (both require a separate file)
-- **Separable from markup**: drop tailwind (stylex, panda, linaria, next-yak and zyzz can move styles to a sibling `*.styles.ts`)
+- **Separable from markup**: drop tailwind (stylex, panda, linaria, yak (next-yak) and zyzz can move styles to a sibling `*.styles.ts`)
 - **Don't care**: drop nothing
 
 ## My view
@@ -311,4 +315,5 @@ Measured 2026-10-18 (zyzz on 2026-10-21). Contributors are distinct human commit
 
 - CSS-modules are the sweet spot. They can do the job, but they're not sexy.
 - StyleX would be a cool try that AI would love and we would probably hate for DX. Panda looks better.
+- Yak (next-yak) will be awesome as a styled replacement as they continue to improve their IDE DX, for now for non-Biome setups
 - Tailwind needs good best practices from us to fix class soup. It does encourage design systems the most. But it's far from native css writing.

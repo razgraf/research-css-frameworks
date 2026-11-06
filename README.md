@@ -6,7 +6,7 @@ The same Next.js landing page ("Visit Mars") built eight times, once per styling
 | ---------------------------------------------- | ----------------------------------- | ------------------------------------------------ |
 | [`apps/css-modules`](apps/css-modules)         | CSS Modules (built into Next)       | `.module.css` files                              |
 | [`apps/tailwind`](apps/tailwind)               | Tailwind CSS 4.3                    | utility classes + `cva`                          |
-| [`apps/next-yak`](apps/next-yak)               | next-yak 9.10                       | `styled` template literals (SWC)                 |
+| [`apps/next-yak`](apps/next-yak)               | yak (next-yak 9.10)                 | `styled` template literals (SWC)                 |
 | [`apps/linaria`](apps/linaria)                 | Linaria 8.2 via `@wyw-in-js/nextjs` | `styled` template literals (build-time eval)     |
 | [`apps/stylex`](apps/stylex)                   | StyleX 0.19                         | `stylex.create` objects                          |
 | [`apps/panda`](apps/panda)                     | Panda CSS 2.2                       | `css()` objects + recipes                        |
@@ -56,7 +56,7 @@ The first six apps render the same page pixel for pixel. Screenshots at 375, 768
 
 ✅ works well · ⚠️ works with a cost · ❌ not supported or works against the library
 
-|                                            | CSS Modules                                                                     | Tailwind                                                              | next-yak                                          | Linaria                           | StyleX                                                                  | Panda                                        | vanilla-extract                                                                  | zyzz                                                                                                    |
+|                                            | CSS Modules                                                                     | Tailwind                                                              | yak (next-yak)                                    | Linaria                           | StyleX                                                                  | Panda                                        | vanilla-extract                                                                  | zyzz                                                                                                    |
 | ------------------------------------------ | ------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | Design tokens                              | ⚠️ CSS variables, untyped in TS                                                 | ✅ `@theme` becomes utilities                                         | ⚠️ CSS variables + typed TS refs, declared twice  | ⚠️ same as yak                    | ✅ `defineVars`, typed                                                  | ✅ typed, `strictTokens`                     | ✅ `createGlobalThemeContract`, typed, stable names                              | ✅ `defineVars`, typed token names; variables are `--z-color-accent`                                    |
 | Light/dark                                 | ✅ `[data-theme]` overrides                                                     | ✅ same variables overridden in `@layer base`                         | ✅ `globalStyle`                                  | ✅ `:global()`                    | ✅ `light-dark()` + `color-scheme`                                      | ✅ semantic tokens `base` / `_light`         | ✅ `assignVars` under `[data-theme=light]`                                       | ⚠️ `{dark, light}` pairs → `light-dark()`; non-color switches need zyzz's internal `z_scheme-*` classes |
@@ -115,7 +115,7 @@ const button = cva(
 );
 ```
 
-**next-yak.** The styled-components pattern, compiled away:
+**yak (next-yak).** The styled-components pattern, compiled away:
 
 ```tsx
 const Base = styled.button<{ $variant: Variant }>`
@@ -267,7 +267,7 @@ namespace styles {
 <article className="surface @container p-6 md:p-8" />
 <div className="flex flex-col-reverse @card-wide:flex-row @card-wide:justify-end" />
 
-// next-yak / Linaria (identical)
+// yak (next-yak) / Linaria (identical)
 const Wrapper = styled.article`
   ${surface};
   container-type: inline-size;
@@ -318,7 +318,7 @@ Each app has a `/showcase` route (`src/showcase/TripCard.tsx`) with one thing th
 
 **StyleX: typed style contracts.** `TripCard` accepts `sx?: StyleXStyles<{ marginBlock?, inlineSize?, maxInlineSize? }>`. Passing an `sx` that sets `color` fails `tsc` (TS2322), and the file keeps that case as a `@ts-expect-error` line so the typecheck proves it. This is the "AI-safe design system" argument. A component decides which properties callers may touch, and the compiler enforces it. It only covers what goes through the `sx` prop. Nothing stops a caller from wrapping the component in another element and styling that.
 
-**next-yak: styled-components ergonomics at zero runtime.** `${Wrapper}:hover ${Title}` targets components imported from another file, and `$progress` drives a progress bar width. yak compiles the prop to an inline CSS variable, `style="--yaLdB8v3:25%"`, behind a static rule. The browser never generates styles.
+**yak (next-yak): styled-components ergonomics at zero runtime.** `${Wrapper}:hover ${Title}` targets components imported from another file, and `$progress` drives a progress bar width. yak compiles the prop to an inline CSS variable, `style="--yaLdB8v3:25%"`, behind a static rule. The browser never generates styles.
 
 **Linaria: arbitrary JS at build time.** A loop over the token palette, `Object.values(mars).map(…)`, builds a gradient and a stripe pattern. WyW runs that code in Node during the build and ships a static `linear-gradient(90deg,#f4a37e 0%,…)`. yak's static parser can't do this. It doesn't even accept `as const` or numeric object keys.
 
@@ -344,7 +344,7 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 | --------------- | ----------------- | ------------- | ------------------------------------ |
 | css-modules     | 3.23 (3.71)       | 1.79 (1.88)   | 821 (846)                            |
 | tailwind        | 3.07 (3.22)       | 1.65 (1.69)   | 809 (823)                            |
-| next-yak        | 3.68 (3.91)       | 1.66 (1.88)   | 874 (905)                            |
+| yak (next-yak)  | 3.68 (3.91)       | 1.66 (1.88)   | 874 (905)                            |
 | linaria         | 4.22 (4.64)       | 2.14 (2.24)   | 869 (903)                            |
 | stylex          | 4.59 (4.98)       | 1.67 (1.71)   | 838 (859)                            |
 | panda           | 3.13 (3.41)       | 1.79 (1.88)   | 822 (841)                            |
@@ -357,7 +357,7 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 | --------------- | ------ | -------- | ----------------- | ------ |
 | css-modules     | 2.5 KB | 148.6 KB | +0.0 KB           | 3.4 KB |
 | tailwind        | 3.7 KB | 148.6 KB | +0.0 KB           | 3.7 KB |
-| next-yak        | 2.3 KB | 149.3 KB | +0.8 KB           | 3.4 KB |
+| yak (next-yak)  | 2.3 KB | 149.3 KB | +0.8 KB           | 3.4 KB |
 | linaria         | 2.2 KB | 150.8 KB | +2.2 KB           | 3.4 KB |
 | stylex          | 2.6 KB | 149.4 KB | +0.8 KB           | 3.9 KB |
 | panda           | 2.8 KB | 153.8 KB | +5.2 KB           | 3.8 KB |
@@ -370,7 +370,7 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 | --------------- | ----------------- | ----------------- | ----------- | ----------- | ----------- | ------------------- |
 | css-modules     | 0.6 (1.3)         | 3.6 (4.8)         | 21.0 (28.3) | 60.0 (72.0) | 60.0 (72.0) | 2.7 (4.0)           |
 | tailwind        | 0.8 (1.4)         | 4.0 (5.0)         | 21.3 (23.0) | 64.0 (68.0) | 64.0 (68.0) | 5.0 (6.4)           |
-| next-yak        | 0.5 (0.8)         | 3.2 (4.0)         | 22.4 (30.0) | 64.0 (76.0) | 64.0 (76.0) | 3.4 (4.8)           |
+| yak (next-yak)  | 0.5 (0.8)         | 3.2 (4.0)         | 22.4 (30.0) | 64.0 (76.0) | 64.0 (76.0) | 3.4 (4.8)           |
 | linaria         | 0.4 (0.9)         | 3.3 (4.7)         | 22.7 (28.5) | 64.0 (76.0) | 64.0 (76.0) | 2.8 (3.7)           |
 | stylex          | 0.6 (0.9)         | 3.4 (4.3)         | 22.6 (27.9) | 64.0 (72.0) | 64.0 (72.0) | 2.7 (3.8)           |
 | panda           | 0.8 (1.1)         | 4.0 (4.5)         | 23.8 (26.9) | 66.0 (76.0) | 66.0 (76.0) | 3.2 (3.8)           |
@@ -391,7 +391,7 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 
 - **Tailwind ships the most CSS of the rest**, 3.7 KB against 2.2 to 2.8 KB for the others. That's preflight plus one utility per value used.
 - **The browser can't tell them apart.** Parse, style recalculation, layout, FCP and LCP all fall within noise. Between two full benchmark runs, the same app's FCP median moved by up to 14 ms (Panda measured 72, 80 and 66 ms across three runs), which is more than the gap between any two apps. The one repeat outlier is Tailwind's theme-toggle recalculation, 4.9 to 5.7 ms against about 3 ms elsewhere in every run, likely from the `:where([data-theme=light] *)` variant on the icons. That's real but tiny.
-- **Build time is the only meaningful difference.** Tailwind, CSS Modules, Panda and next-yak finish cold builds within 0.6 s of each other. Linaria costs about 1.1 s more (it executes style code in Node), and StyleX about 1.5 s more (Babel over every file). With a warm cache, the first six build in 1.7 to 2.1 s. vanilla-extract costs about 1.2 s more cold and is the slowest warm build at 2.9 s, with the highest peak memory (927 MB). Its loader evaluates every `.css.ts` file in Node, and the warm number suggests that work isn't cached between builds. It was measured a day after the others, so CSS Modules was re-timed the same day as a check: 3.44 s mean over 5 cold builds, close to the 3.23 s in the table.
+- **Build time is the only meaningful difference.** Tailwind, CSS Modules, Panda and yak (next-yak) finish cold builds within 0.6 s of each other. Linaria costs about 1.1 s more (it executes style code in Node), and StyleX about 1.5 s more (Babel over every file). With a warm cache, the first six build in 1.7 to 2.1 s. vanilla-extract costs about 1.2 s more cold and is the slowest warm build at 2.9 s, with the highest peak memory (927 MB). Its loader evaluates every `.css.ts` file in Node, and the warm number suggests that work isn't cached between builds. It was measured a day after the others, so CSS Modules was re-timed the same day as a check: 3.44 s mean over 5 cold builds, close to the 3.23 s in the table.
 - **zyzz** sits with Linaria and vanilla-extract on cold builds (4.3 s) and with the fast group warm (1.7 s), and its peak memory (837 MB) is close to CSS Modules'. It was measured on 2026-10-21, with two same-day checks:
   - CSS Modules: 3.01 s mean over 5 cold builds, and an FCP median of 64 ms on the updated trace script, both matching the table.
   - zyzz: the first full run was disturbed by other work on the machine. It showed one 12.3 s cold build and an FCP of 92 ms. A clean re-run gave the table's numbers, FCP 72 ms, which is within run-to-run noise.
@@ -424,7 +424,7 @@ Measured 2026-10-15 on Apple M1 Max (10 cores, 64 GB), Darwin 27.0.0, Node v24.1
 - `tailwind-merge` doesn't read `@theme`. Custom names (`text-small`, `rounded-medium`, `font-regular`) have to be declared again in `extendTailwindMerge`, or `text-small` is treated as a color and dropped next to `text-text-on-accent`.
 - `--*: initial` also removes the line-height and letter-spacing scales, so those become arbitrary values (`leading-[1.5]`, `tracking-[1px]`), as does 40px, which isn't on the spacing scale.
 
-**next-yak**
+**yak (next-yak)**
 
 - The cross-file constant resolver only reads object properties with identifier keys. It drops `spacing[8]` and `"8": "32px"`, and the build fails with `Unable to resolve "spacing.8"`, so spacing became `spacing.s8`.
 - It doesn't parse `as const` objects either, so token objects must be plain literals.
@@ -498,7 +498,7 @@ What works on 7, in all seven apps:
 
 - `next build`. Next 16.4 type-checks by running the `tsc` CLI, and a planted `const x: number = "nope"` failed the build with TS2322.
 - `tsc --noEmit`, including the `@ts-expect-error` guards in the StyleX, Panda and vanilla-extract showcases, which still reject what they should.
-- Every styling tool. Panda codegen, StyleX's Babel plugin, wyw (oxc), next-yak (SWC) and vanilla-extract (vite-node) don't use the TypeScript API, and neither does Biome.
+- Every styling tool. Panda codegen, StyleX's Babel plugin, wyw (oxc), yak (next-yak) (SWC) and vanilla-extract (vite-node) don't use the TypeScript API, and neither does Biome.
 
 `tsc --noEmit` time, median of 5 runs with no incremental cache:
 
@@ -506,7 +506,7 @@ What works on 7, in all seven apps:
 | --------------- | ------------------------------------- | -------- |
 | css-modules     | 0.89 s                                | 0.13 s   |
 | tailwind        | 0.89 s                                | 0.14 s   |
-| next-yak        | 0.88 s                                | 0.14 s   |
+| yak (next-yak)  | 0.88 s                                | 0.14 s   |
 | linaria         | 1.01 s                                | 0.16 s   |
 | stylex          | 1.13 s                                | 0.20 s   |
 | panda           | 1.22 s                                | 0.24 s   |
@@ -527,14 +527,14 @@ Not verified: editor behavior (completion, hover, go-to-definition) with TypeScr
 
 The benchmark tables above ran on 7.0.2. The same suite on 6.0.3 gave these cold builds:
 
-| App         | Cold build, TS 6.0.3 | Cold build, TS 7.0.2 | Peak RSS, 6.0.3 → 7.0.2 |
-| ----------- | -------------------- | -------------------- | ----------------------- |
-| css-modules | 4.02 s               | 3.19 s               | 813 → 810 MB            |
-| tailwind    | 3.98 s               | 3.13 s               | 812 → 808 MB            |
-| next-yak    | 4.39 s               | 3.49 s               | 869 → 858 MB            |
-| linaria     | 6.57 s               | 4.34 s               | 1409 → 876 MB           |
-| stylex      | 5.43 s               | 4.65 s               | 841 → 847 MB            |
-| panda       | 4.37 s               | 3.40 s               | 816 → 812 MB            |
+| App            | Cold build, TS 6.0.3 | Cold build, TS 7.0.2 | Peak RSS, 6.0.3 → 7.0.2 |
+| -------------- | -------------------- | -------------------- | ----------------------- |
+| css-modules    | 4.02 s               | 3.19 s               | 813 → 810 MB            |
+| tailwind       | 3.98 s               | 3.13 s               | 812 → 808 MB            |
+| yak (next-yak) | 4.39 s               | 3.49 s               | 869 → 858 MB            |
+| linaria        | 6.57 s               | 4.34 s               | 1409 → 876 MB           |
+| stylex         | 5.43 s               | 4.65 s               | 841 → 847 MB            |
+| panda          | 4.37 s               | 3.40 s               | 816 → 812 MB            |
 
 Type-checking was a bigger share of `next build` than I expected. Most apps lost 0.8 to 1 s. Linaria lost 2.2 s and 530 MB of peak memory, so most of what I first blamed on WyW's build-time evaluation was the TypeScript 6 type check. Bundle sizes didn't change.
 
